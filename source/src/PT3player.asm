@@ -61,6 +61,9 @@ _PT3WRK = VT_+256  ;rb	32
 ; ------------------------------------------------------------------------------
 ; Constants
 
+;ChannelsVars
+;struc	CHNPRM
+;reset group
 CHNPRM_PsInOr = 0	 ;RESB 1
 CHNPRM_PsInSm = 1	 ;RESB 1
 CHNPRM_CrAmSl = 2	 ;RESB 1
@@ -70,7 +73,10 @@ CHNPRM_TSlCnt = 5	 ;RESB 1
 CHNPRM_CrTnSl = 6	 ;RESW 1
 CHNPRM_TnAcc  = 8	 ;RESW 1
 CHNPRM_COnOff = 10 ;RESB 1
+;reset group
+
 CHNPRM_OnOffD = 11 ;RESB 1
+
 ;IX for PTDECOD here (+12)
 CHNPRM_OffOnD = 12 ;RESB 1
 CHNPRM_OrnPtr = 13 ;RESW 1
@@ -80,17 +86,17 @@ CHNPRM_Note   = 18 ;RESB 1
 CHNPRM_SlToNt = 19 ;RESB 1
 CHNPRM_Env_En = 20 ;RESB 1
 CHNPRM_Flags  = 21 ;RESB 1
- ;Enabled - 0,SimpleGliss - 2
+
+;Enabled - 0,SimpleGliss - 2
 CHNPRM_TnSlDl = 22 ;RESB 1
 CHNPRM_TSlStp = 23 ;RESW 1
 CHNPRM_TnDelt = 25 ;RESW 1
 CHNPRM_NtSkCn = 27 ;RESB 1
 CHNPRM_Volume = 28 ;RESB 1
 CHNPRM_Size   = 29 ;RESB 1
-; - endstruc -
+; endstruc
 
 ;- struc AR -
-
 AR_TonA  = 0	;RESW 1
 AR_TonB  = 2	;RESW 1
 AR_TonC  = 4	;RESW 1
@@ -131,8 +137,8 @@ VAR0END = VT_+16 ;INIT zeroes from VARS to VAR0END-1
 ;EP: End point. A 1 cada vez que el tema acaba. 
 ;CH1-CH3: Channel enable/disable. A 1 si no queremos que suene el canal. (AUN  NO VA!!)
 
-SETUP     =	_PT3WRK 	; set bit0 to 1, if you want to play without LOOPING
-					; bit7 is set each time, when loop point is passed
+SETUP     =	_PT3WRK 	  ; set bit0 to 1, if you want to play without LOOPING
+					              ; bit7 is set each time, when loop point is passed
 CrPsPtr   =	_PT3WRK+1  	; 2 bytes POSICION CURSOR EN PATTERN
 _MODADDR =	_PT3WRK+3	  ; 2 bytes dir musica guardada
 _MDADDR2 =	_PT3WRK+5	  ; 2 bytes dir musica guardada 2 (? Creo que puedo usar el mismo siempre)
@@ -795,7 +801,6 @@ CH_NOEN:
 	JR   Z,NO_ENAC
 	LD   CHNPRM_CrEnSl(IX),A
 NO_ENAC:	
-;LD HL,AddToEn	; ## APUNTA A AUTOMODIF
 	ld	 HL,#_ADDTOEN	; # chg
 	ADD  A,(HL) ;BUG IN PT3 - NEED WORD HERE.
 		   ;FIX IT IN NEXT VERSION?
@@ -993,13 +998,11 @@ ROUT:
   XOR  A
 
 ROUT_A0:
-  push AF
-	ld	 A,(#AYREGS+7)			; # FIJA BUG DEL MIXER
-	and	 #0B00111111
-	or	 #0B10000000
-	ld	 (#AYREGS+7),A
-	pop	 AF
-
+  ; FIJA BUG DEL MIXER
+  LD	 HL,#AYREGS+AR_Mixer
+	set	 7,(HL)
+	res	 6,(HL)
+  
 	ld   C,#0xA0
 	ld   HL,#AYREGS
   
