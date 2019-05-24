@@ -92,5 +92,6 @@ For C:
 ## 5. Functions
 
 * void PT3Init(unsigned int,char) Init Song: (unsigned int) Song data address ;(char) Loop - 0=off ; 1=on
-* void PT3Play() Play song. Execute on each interruption of VBLANK.
+* void PT3Run() Render a frame from PT3 Song.
+* void PT3PlayAY() Play Song. Execute on each interruption of VBLANK.
 * void PT3Stop() Stop Song.

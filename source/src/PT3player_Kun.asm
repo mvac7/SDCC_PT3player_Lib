@@ -54,68 +54,26 @@ ChanC = ChanB + 29	;rb CHNPRM_Size		; 29 bytes
 
 ; - GlobalVars -
 
-DelyCnt = ChanC   + 29  ;	1
-CurESld = DelyCnt + 1   ;	2	
-CurEDel = CurESld + 2   ;	1
+DelyCnt = ChanC + 29  ;	rb 1			; 1
+CurESld = DelyCnt + 1 ;	rw 1			; 2	
+CurEDel = CurESld + 2 ;	rb 1			; 1
 
 Ns_Base_AddToNs = CurEDel + 1
-
-Ns_Base = Ns_Base_AddToNs ;	1
-AddToNs = Ns_Base + 1     ; 1
+Ns_Base = Ns_Base_AddToNs ;	rb 1			; 1
+AddToNs = Ns_Base + 1     ; rb 1			; 1
 
  
 VT_ = AddToNs + 1  ;256B  
-AYREGS  = VT_      ;14B ?
-EnvBase = VT_+14
-VAR0END = VT_+16   ;INIT zeroes from VARS to VAR0END-1
-
+AYREGS = VT_       ;14B ?
 _PT3WRK = VT_+256  ;rb	32
 
-;AYREGS:
-;VT_:			  .ds	14
-;EnvBase:		.ds	2
-;VAR0END:		.ds	240
+AYREGS:
+VT_:			  .ds	14
+EnvBase:		.ds	2
+VAR0END:		.ds	240
 
 
-
-
-
-; --- Workarea --- (apunta a RAM que estaba antes en codigo automodificable)
-
-; -El byte de estado en SETUP deberia ser algo asi (CH enable/disable no esta aun)
-;|EP|0|0|0|CH3|CH2|CH1|LP|
-
-;LP: Loop enable/disable. A 1 si queremos que el tema suene solo una vez. 
-;EP: End point. A 1 cada vez que el tema acaba. 
-;CH1-CH3: Channel enable/disable. A 1 si no queremos que suene el canal. (AUN  NO VA!!)
-
-PT3_SETUP   = _PT3WRK     ; set bit0 to 1, if you want to play without LOOPING
-                          ; bit7 is set each time, when loop point is passed
-PT3_MODADDR =	_PT3WRK+1	  ; 2 bytes dir musica guardada
-PT3_CrPsPtr = _PT3WRK+3   ; 2 bytes POSICION CURSOR EN PATTERN
-PT3_SAMPTRS = _PT3WRK+5	  ; 2 bytes sample info?
-PT3_OrnPtrs =	_PT3WRK+7   ; 2 bytes Ornament pattern
-PT3_PDSP    =	_PT3WRK+9	  ; 2 bytes pilasave
-PT3_CSP     =	_PT3WRK+11	; 2 bytes pilsave2
-PT3_PSP     =	_PT3WRK+13	; 2 bytes pilsave3
-
-PT3_PrNote  = _PT3WRK+15  ;.ds	1
-PT3_PrSlide = _PT3WRK+16  ;.ds	2
-
-PT3_AdInPtA = _PT3WRK+18  ;2 bytes play data pattern
-PT3_AdInPtB = _PT3WRK+20  ;2 bytes play data
-PT3_AdInPtC = _PT3WRK+22  ;2 bytes play data
-
-PT3_LPosPtr = _PT3WRK+24  ;2 bytes Pos Ptr
-PT3_PatsPtr = _PT3WRK+26  ;2 bytes Pat Ptr
-
-PT3_Delay   = _PT3WRK+28  ;1 byte delay
-PT3_AddToEn = _PT3WRK+29  ;1 byte Envelope data (No cal ya que no usa Envs??)
-PT3_Env_Del = _PT3WRK+31  ;1 byte Envelope data (idem)
-PT3_ESldAdd = _PT3WRK+32  ;2 bytes Envelope data (idem)
-
-
-
+;total mem = 0x17D
 
 ; ------------------------------------------------------------------------------
 ; Constants
@@ -174,6 +132,7 @@ AR_EnvTp = 13	;RESB 1
 ;endstruc
 
 
+EnvBase = VT_+14
 
 T1_ = VT_+16 ;Tone tables data depacked here
 
@@ -186,9 +145,39 @@ T_NEW_1 = T_OLD_1
 T_NEW_2 = T_NEW_0+24
 T_NEW_3 = T_OLD_3
 
+Ampl = AYREGS+AR_AmplC
+
+VAR0END = VT_+16 ;INIT zeroes from VARS to VAR0END-1
 
 
+; --- Workarea --- (apunta a RAM que estaba antes en codigo automodificable)
 
+; -El byte de estado en SETUP deberia ser algo asi (CH enable/disable no esta aun)
+;|EP|0|0|0|CH3|CH2|CH1|LP|
+
+;LP: Loop enable/disable. A 1 si queremos que el tema suene solo una vez. 
+;EP: End point. A 1 cada vez que el tema acaba. 
+;CH1-CH3: Channel enable/disable. A 1 si no queremos que suene el canal. (AUN  NO VA!!)
+
+SETUP     =	_PT3WRK 	  ; set bit0 to 1, if you want to play without LOOPING
+					              ; bit7 is set each time, when loop point is passed
+CrPsPtr   =	_PT3WRK+1  	; 2 bytes POSICION CURSOR EN PATTERN
+_MODADDR =	_PT3WRK+3	  ; 2 bytes dir musica guardada
+_MDADDR2 =	_PT3WRK+5	  ; 2 bytes dir musica guardada 2 (? Creo que puedo usar el mismo siempre)
+_SAMPTRS =	_PT3WRK+7	  ; 2 bytes sample info?
+_PDSP    =	_PT3WRK+9	  ; 2 bytes pilasave
+_ORNPTRS =	_PT3WRK+11	; 2 bytes Ornament pattern
+_CSP     =	_PT3WRK+13	; 2 bytes pilsave2 (? puede usarse solo 1 tb??)
+_ADINPTA =	_PT3WRK+15	; 2 bytes play data pattern
+_ADINPTB =	_PT3WRK+17	; 2 bytes play data
+_LPOSPTR =	_PT3WRK+19	; 2 bytes Pos Ptr
+_PATSPTR =	_PT3WRK+21	; 2 bytes Pat Ptr
+_PSP     =	_PT3WRK+23	; 2 bytes pilsave3 (? idem usar solo 1??)
+_ADINPTC =	_PT3WRK+25	; 2 bytes play data
+_DELAY   =	_PT3WRK+27	; 1 byte delay
+_ADDTOEN =	_PT3WRK+28	; 1 byte Envelope data (No cal ya que no usa Envs??)
+_ENVDEL  =	_PT3WRK+29	; 1 byte Envelope data (idem)
+_ESLDADD =	_PT3WRK+30	; 2 bytes Envelope data (idem)
 	
 
 ; ================================================ REPLAYER =================================================
@@ -202,21 +191,17 @@ T_NEW_3 = T_OLD_3
 ; -- replayer --
 
 CHECKLP:	
-  LD   HL,#PT3_SETUP
-	SET  7,(HL)   ; -------------------------------------------------------------- <<< ????
-	BIT  0,(HL)   ;loop bit 
+  LD   HL,#SETUP
+	SET  7,(HL)
+	BIT  0,(HL)
 	RET  Z
-  
-;=1 - No loop
 	POP  HL
 	LD   HL,#DelyCnt
 	INC  (HL)
 	LD   HL,#ChanA+CHNPRM_NtSkCn
 	INC  (HL)
 
-
-
-;-------------------------------------------------------------------------------  
+  
 MUTE:
 _PT3Stop::	
   XOR  A
@@ -224,20 +209,16 @@ _PT3Stop::
 	LD   L,A
 	LD   (#AYREGS+AR_AmplA),A
 	LD   (#AYREGS+AR_AmplB),HL
-	JP   _PT3PlayAY                ;ROUT_A0
-;-------------------------------------------------------------------------------
+	JP   ROUT_A0
 
 
-
-
-;-------------------------------------------------------------------------------
 ; void PT3Init(unsigned int,char)
 _PT3Init::
   push IX
   ld   IX,#0
   add  IX,SP
   
-  ld   HL,#PT3_SETUP
+  ld   HL,#SETUP
   ld   A,6(IX)
   or   A
   jr   NZ,SongLoop
@@ -254,23 +235,23 @@ initSong:
   
   pop  IX
   ret
-;-------------------------------------------------------------------------------
-
   
 
 
 ;-------------------------------------------------------------------------------
-;_PT3Run::   
-;  push IX
-;  call PLAY
-;  pop  IX
-;  ret
+_PT3Play::   
+  push IX
+  
+  call PLAY
+  
+  pop  IX
+  ret
 
 
 ;void PT3Loop(char)
 ;_PT3Loop::
 ;  push IX
-;  ld   HL,#PT3_SETUP
+;  ld   HL,#SETUP
 ;  ld   A,4(IX)
 ;  or   A
 ;  jr   NZ,SongLoop
@@ -287,84 +268,52 @@ initSong:
 playerINIT::
 	;HL - AddressOfModule-100
 	;ld hl,MDLADDR-100	; ## esto ahora se da como entrada al llamar a rutina
-	; asi que la musica puede ir en cualquier lado ROM o RAM
+				; asi que la musica puede ir en cualquier lado ROM o RAM
 
-	;or	 A		; # added
-	;ld	 DE,#100		; # added
-	;sbc	 HL,DE		; # added
+	or	 A		; # added
+	ld	 DE,#100		; # added
+	sbc	 HL,DE		; # added
 
-	LD   (#PT3_MODADDR),HL	; # chg
+	LD   (#_MODADDR),HL	; # chg
+	LD   (#_MDADDR2),HL	; # chg
 	PUSH HL
 	LD   DE,#100
 	ADD  HL,DE
 	LD   A,(HL)
-	LD   (#PT3_Delay),A		; # chg
+	LD   (#_DELAY),A		; # chg
 	PUSH HL
-	POP  IX
+	POP  IX      ; <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------------------------------- ???
 	ADD  HL,DE
-	LD   (#PT3_CrPsPtr),HL
+	LD   (#CrPsPtr),HL
 	LD   E,102-100(IX)
 	ADD  HL,DE
 	INC  HL
-	LD   (#PT3_LPosPtr),HL	; # chg
-	POP  DE
+	LD   (#_LPOSPTR),HL	; # chg
+	POP  DE      ; <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------------------------------- ???
 	LD   L,103-100(IX)
 	LD   H,104-100(IX)
 	ADD  HL,DE
-	LD   (#PT3_PatsPtr),HL	; # chg
+	LD   (#_PATSPTR),HL	; # chg
 	LD   HL,#169
 	ADD  HL,DE
-	LD   (#PT3_OrnPtrs),HL	; # chg
+	LD   (#_ORNPTRS),HL	; # chg
 	LD   HL,#105
 	ADD  HL,DE
-	LD   (#PT3_SAMPTRS),HL	; # chg
-	LD   HL,#PT3_SETUP
+	LD   (#_SAMPTRS),HL	; # chg
+	LD   HL,#SETUP
 	RES  7,(HL)
 
-
-; Create Volume Table for Vortex Tracker II/PT3.5
-; (c) Ivan Roshin, adapted by SapphiRe ---
-  ld	HL,#0x11
-  ld	D,H
-  ld  E,H
-  ld  IX,#VT_+16
-  ld  B,#15
-INITV1:	
-  push HL
-  add  HL,DE
-  ex   DE,HL
-  sbc  HL,HL
-  ld   C,B 
-  ld   B,#16
-INITV2:	
-  ld   A,L
-  rla
-  ld   A,H
-  adc  A,#0
-  ld   (IX),A
-  inc  IX
-  add  HL,DE
-  djnz INITV2
-  pop  HL
-  ld   A,E
-  cp   #0x77
-  jr   NZ,INITV3
-  inc  E
-INITV3:	
-  ld   B,C
-  djnz INITV1
-    
-
-  
-  
-  ; --- INITIALIZE PT3 VARIABLES ---
-	xor	 A	
+	ld	 HL,#VTcopy	; # added
+	ld	 DE,#VT_		; # copia tabla de volumen		
+	ld	 BC,#256
+	ldir
+	xor	 A
+	
 	LD   HL,#VARS
 	LD   (HL),A
 	LD   DE,#VARS+1
 	LD   BC,#VAR0END - VARS -1
 	LDIR
-  
 	INC  A
 	LD   (#DelyCnt),A
 	LD   HL,#0xF001	;H - CHNPRM_Volume, L - CHNPRM_NtSkCn
@@ -373,7 +322,7 @@ INITV3:
 	LD   (#ChanC+CHNPRM_NtSkCn),HL
 
 	LD   HL,#EMPTYSAMORN
-	LD   (#PT3_AdInPtA),HL ;ptr to zero  ; # chg
+	LD   (#_ADINPTA),HL ;ptr to zero  ; # chg
 	LD   (#ChanA+CHNPRM_OrnPtr),HL ;ornament 0 is "0,1,0"
 	LD   (#ChanB+CHNPRM_OrnPtr),HL ;in all versions from
 	LD   (#ChanC+CHNPRM_OrnPtr),HL ;3.xx to 3.6x and VTII
@@ -383,13 +332,11 @@ INITV3:
 	LD   (#ChanC+CHNPRM_SamPtr),HL ;S3 can comment S1,2,3; see
 				    ;also EMPTYSAMORN comment
 	ret
-;------------------------------------------------------------------------------- END playerINIT
-
-
-
+;  JP   ROUT_A0   ;<------------------------------------------------------------ aorante, no ha de empezar a sonar en la inicializacion
   
   
-;-------------------------------------------------------------------------------
+  
+
 ;pattern decoder
 PD_OrSm:	
   LD   -12+CHNPRM_Env_En(IX),#0
@@ -403,12 +350,16 @@ PD_SAM:
 PD_SAM_:	
   LD   E,A
 	LD   D,#0
-	ld	 HL,(#PT3_SAMPTRS)
+SamPtrs: ;equ $+1			; ## AUTOMODIF-1 !! (_SAMPTRS)
+	;LD HL,$2121
+	ld	 HL,(#_SAMPTRS)		; # chg
 	ADD  HL,DE
 	LD   E,(HL)
 	INC  HL
 	LD   D,(HL)
-	ld	 HL,(#PT3_MODADDR)
+MODADDR: ;equ $+1			; ## AUTOMODIF-2 !! (_MODADDR)
+	;LD HL,$2121
+	ld	 HL,(#_MODADDR)		; # chg
 	ADD  HL,DE
 	LD   -12+CHNPRM_SamPtr(IX),L
 	LD   -12+CHNPRM_SamPtr+1(IX),H
@@ -453,10 +404,7 @@ PD_ESAM:
 
 PTDECOD: 
   LD   A,-12+CHNPRM_Note(IX)
-	LD   (#PT3_PrNote),A           ;LD   (#PrNote+1),A
-  LD   L,CHNPRM_CrTnSl-12(IX)
-  LD   H,CHNPRM_CrTnSl+1-12(IX)
-  LD  (#PT3_PrSlide),HL
+	LD   (#PrNote+1),A
 
 PD_LOOP:	
   ld   DE,#0x2010
@@ -485,19 +433,17 @@ PD_LP2:
 	ADD  A,A
 	LD   E,A
 	
-  LD   HL,#(SPCCOMS + 0xDF20)  ;LD HL,((SPCCOMS+$DF20) % 65536)
-;	PUSH DE
-;	LD   DE,#0xDF20
-;	LD   HL,#SPCCOMS	
-;	ADD  HL,DE
-;	POP  DE	
-  
-  ADD  HL,DE
-  LD   E,(HL)
-  INC  HL
-  LD   D,(HL)
-  PUSH DE
-  
+	PUSH DE
+	LD   DE,#0xDF20
+	LD   HL,#SPCCOMS	
+	ADD  HL,DE
+	POP  DE
+	
+	ADD  HL,DE
+	LD   E,(HL)
+	INC  HL
+	LD   D,(HL)
+	PUSH DE
 	JR   PD_LOOP
 
 PD_NOIS:	
@@ -514,7 +460,8 @@ PD_NOTE:
 	XOR  A
 
 PD_RES:	
-	ld	 (#PT3_PDSP),SP
+  ;LD (PDSP_+1),SP			; ## AUTOMODIF-3 (_PDSP) PilaSave !!
+	ld	 (#_PDSP),SP		; # chg
 	LD   SP,IX
 	LD   H,A
 	LD   L,A
@@ -524,7 +471,9 @@ PD_RES:
 	PUSH HL
 	PUSH HL
 	PUSH HL
-	ld	SP,(#PT3_PDSP)
+PDSP_:	
+  ;LD SP,$3131			; ## AUTOMODIF-3 (@PDSP_@) PilaSave !!
+	ld	SP,(#_PDSP)		; # chg
 
 PD_FIN:	
   ld   A,-12+CHNPRM_NNtSkp(IX)
@@ -553,7 +502,8 @@ C_PORTM:
 	LD   H,(HL)
 	LD   L,A
 	PUSH HL
-  LD   A,(#PT3_PrNote)            ;<--- LD   A,#0x3E
+PrNote:	
+  LD   A,#0x3E
 	LD   -12+CHNPRM_Note(IX),A
 	ADD  A,A
 	LD   L,A
@@ -566,9 +516,10 @@ C_PORTM:
 	SBC  HL,DE
 	LD   -12+CHNPRM_TnDelt(IX),L
 	LD   -12+CHNPRM_TnDelt+1(IX),H
-  LD   DE,(#PT3_PrSlide)             ;<--- change to Kun version
-	LD   -12+CHNPRM_CrTnSl(IX),E       ;<---
-	LD   -12+CHNPRM_CrTnSl+1(IX),D     ;<---
+	LD   E,-12+CHNPRM_CrTnSl(IX)
+	LD   D,-12+CHNPRM_CrTnSl+1(IX)
+
+OLDPRTM:	
   LD   A,(BC) ;SIGNED TONE STEP
 	INC  BC
 	EX   AF,AF
@@ -633,7 +584,7 @@ C_VIBRT:
 C_ENGLS:	
   LD   A,(BC)
 	INC  BC
-	LD   (#PT3_Env_Del),A
+	LD   (#_ENVDEL),A			; # chg
 	LD   (#CurEDel),A
 	LD   A,(BC)
 	INC  BC
@@ -641,13 +592,13 @@ C_ENGLS:
 	LD   A,(BC)
 	INC  BC
 	LD   H,A
-	LD   (#PT3_ESldAdd),HL
+	LD   (#_ESLDADD),HL		; # chg
 	RET
 
 C_DELAY:	
   LD   A,(BC)
 	INC  BC
-	LD   (#PT3_Delay),A
+	LD   (#_DELAY),A			; # chg
 	RET
 	
 SETENV:	
@@ -666,7 +617,6 @@ SETENV:
 	LD   H,A
 	LD   L,A
 	LD   (#CurESld),HL
-  
 C_NOP:	
   RET
 
@@ -675,22 +625,23 @@ SETORN:
 	LD   E,A
 	LD   D,#0
 	LD   -12+CHNPRM_PsInOr(IX),D
-	ld	 HL,(#PT3_OrnPtrs) 
+OrnPtrs:	
+  ;equ $+1			; ## AUTOMOFIF-4 (_ORNPTRS) Ornaments
+	;LD HL,$2121
+	ld	 HL,(#_ORNPTRS)		; # chg
 	ADD  HL,DE
 	LD   E,(HL)
 	INC  HL
 	LD   D,(HL)
-	ld   HL,(#PT3_MODADDR) 
+MDADDR2:
+	;equ $+1			; ## AUTOMOFIF-1b (@MODADR2@) Ornaments
+	;LD HL,$2121
+	ld   HL,(#_MDADDR2)		; # chg
 	ADD  HL,DE
 	LD   -12+CHNPRM_OrnPtr(IX),L
 	LD   -12+CHNPRM_OrnPtr+1(IX),H
 	RET
 
-
-
-
-
-;-------------------------------------------------------------------------------
 ;ALL 16 ADDRESSES TO PROTECT FROM BROKEN PT3 MODULES 
 
 SPCCOMS: 
@@ -712,16 +663,14 @@ SPCCOMS:
 .dw C_NOP
 
 
-
-
-
 CHREGS:	
   XOR  A
-	LD   (#AYREGS+AR_AmplC),A
+	LD   (#Ampl),A
 	BIT   0,CHNPRM_Flags(IX)
 	PUSH  HL
 	JP    Z,CH_EXIT
-	ld	 (#PT3_CSP),sp
+	;LD (CSP_+1),SP			; ## APUNTA A CODIGO AUTOMODIF
+	ld	 (#_CSP),sp		; # chg
 	LD   L,CHNPRM_OrnPtr(IX)
 	LD   H,CHNPRM_OrnPtr+1(IX)
 	LD   SP,HL
@@ -788,7 +737,9 @@ CH_NOAC:
 	LD   E,CHNPRM_CrTnSl(IX)
 	LD   D,CHNPRM_CrTnSl+1(IX)
 	ADD  HL,DE
-	ld	 SP,(#PT3_CSP)
+CSP_:	
+;LD SP,$3131			; ## AUTOMODIF-5 (@CSP_@) Mas pila
+	ld	 SP,(#_CSP)		; # chg
 	EX   (SP),HL
 	XOR  A
 	OR   CHNPRM_TSlCnt(IX)
@@ -858,7 +809,7 @@ CH_ENV:
 	JR   NZ,CH_NOEN
 	OR   CHNPRM_Env_En(IX)
 CH_NOEN:	
-  LD   (#AYREGS+AR_AmplC),A
+  LD   (#Ampl),A
 	BIT  7,B
 	LD   A,C
 	JR   Z,NO_ENSL
@@ -872,7 +823,7 @@ CH_NOEN:
 	JR   Z,NO_ENAC
 	LD   CHNPRM_CrEnSl(IX),A
 NO_ENAC:	
-	ld	 HL,#PT3_AddToEn 
+	ld	 HL,#_ADDTOEN	; # chg
 	ADD  A,(HL) ;BUG IN PT3 - NEED WORD HERE.
 		   ;FIX IT IN NEXT VERSION?
 	LD   (HL),A
@@ -910,45 +861,55 @@ CH_ONDL:
 	RET
 
 
-;------------------------------------------------------------------------------- PLAY PT3
-;PLAY:
-_PT3Run:: 
+
+
+PLAY:
   XOR  A
-	LD   (#PT3_AddToEn),A
+	LD   (#_ADDTOEN),A
 	LD   (#AYREGS+AR_Mixer),A
 	DEC  A
 	LD   (#AYREGS+AR_EnvTp),A
 	LD   HL,#DelyCnt
 	DEC  (HL)
-	JP   NZ,PL2 
+	JP   NZ,PL2	; # jr nz cambiado por jp nz pq no llega
 	LD   HL,#ChanA+CHNPRM_NtSkCn
 	DEC  (HL)
 	JR   NZ,PL1B
-	ld	 BC,(#PT3_AdInPtA)
+AdInPtA:	
+;equ $+1			; ## AUTOMODIF-6 (_ADINPTA)
+	;LD BC,$0101
+	ld	 BC,(#_ADINPTA)		; # chg
 	LD   A,(BC)
 	AND  A
 	JR   NZ,PL1A
 	LD   D,A
 	LD   (#Ns_Base),A
-	LD   HL,(#PT3_CrPsPtr)
+	LD   HL,(#CrPsPtr)
 	INC  HL
 	LD   A,(HL)
 	INC  A
 	JR   NZ,PLNLP
 	CALL CHECKLP
-	ld	 HL,(#PT3_LPosPtr)
+LPosPtr:	
+;equ $+1			; ## AUTOMODIF-7 (_LPOSPTR)
+;LD HL,$2121
+	ld	 HL,(#_LPOSPTR)		; # chg
 	LD   A,(HL)
 	INC  A
 PLNLP:	
-  LD   (#PT3_CrPsPtr),HL
+  LD   (#CrPsPtr),HL
 	DEC  A
 	ADD  A,A
 	LD   E,A
 	RL   D
-	ld   HL,(#PT3_PatsPtr)
+PatsPtr:	
+;equ $+1			; ## AUTOMODIF-8 (_PATSPTR)
+	;LD HL,$2121
+	ld   HL,(#_PATSPTR)		; # chg
 	ADD  HL,DE
-	LD   DE,(#PT3_MODADDR)
-	ld   (#PT3_PSP),SP
+	LD   DE,(#_MODADDR)		; # chg
+	;LD (PSP_+1),SP
+	ld   (#_PSP),sp		; # chg
 	LD   SP,HL
 	POP  HL
 	ADD  HL,DE
@@ -956,37 +917,47 @@ PLNLP:
 	LD   C,L
 	POP  HL
 	ADD  HL,DE
-	LD   (#PT3_AdInPtB),HL
+	LD   (#_ADINPTB),HL		; # chg
 	POP  HL
 	ADD  HL,DE
-	LD   (#PT3_AdInPtC),HL
-	ld   SP,(#PT3_PSP)
-  
+	LD   (#_ADINPTC),HL		; # chg
+PSP_:	
+;LD SP,$3131			; ## AUTOMODIF-9 (_PSP) Mas Pila
+	ld   SP,(#_PSP)		; # chg
 PL1A:	
   LD   IX,#ChanA+12
 	CALL PTDECOD
-	LD   (#PT3_AdInPtA),BC
-  
+	LD   (#_ADINPTA),BC		; # chg
+
 PL1B:	
   LD   HL,#ChanB+CHNPRM_NtSkCn
 	DEC  (HL)
 	JR   NZ,PL1C
 	LD   IX,#ChanB+12
-	ld   BC,(#PT3_AdInPtB)
+AdInPtB:	
+;equ $+1			; ## AUTOMODIF-10 (_ADINPTB)
+	;LD BC,$0101
+	ld   BC,(#_ADINPTB)		; # chg
 	CALL PTDECOD
-	LD   (#PT3_AdInPtB),BC
+	LD   (#_ADINPTB),BC		; # chg
 
 PL1C:	
   LD   HL,#ChanC+CHNPRM_NtSkCn
 	DEC  (HL)
 	JR   NZ,PL1D
 	LD   IX,#ChanC+12
-	ld   BC,(#PT3_AdInPtC)
+AdInPtC:	
+;equ $+1			; ## AUTOMODIF-11 (_ADINPTC)
+	;LD BC,$0101
+	ld   BC,(#_ADINPTC)		; # chg
 	CALL PTDECOD
-	LD   (#PT3_AdInPtC),BC
+	LD   (#_ADINPTC),BC
 
+Delay:	
+;equ $+1				; ## AUTOMODIF-12 (_DELAY)
 PL1D:	
-	ld   A,(#PT3_Delay)
+;LD A,$3E
+	ld   A,(#_DELAY)		; # chg
 	ld   (#DelyCnt),A
 
 PL2:	
@@ -994,13 +965,13 @@ PL2:
 	LD   HL,(#AYREGS+AR_TonA)
 	CALL CHREGS
 	LD   (#AYREGS+AR_TonA),HL
-	LD   A,(#AYREGS+AR_AmplC)
+	LD   A,(#Ampl)
 	LD   (#AYREGS+AR_AmplA),A
 	LD   IX,#ChanB
 	LD   HL,(#AYREGS+AR_TonB)
 	CALL CHREGS
 	LD   (#AYREGS+AR_TonB),HL
-	LD   A,(#AYREGS+AR_AmplC)
+	LD   A,(#Ampl)
 	LD   (#AYREGS+AR_AmplB),A
 	LD   IX,#ChanC
 	LD   HL,(#AYREGS+AR_TonC)
@@ -1012,7 +983,10 @@ PL2:
 	ADD  A,L
 	LD   (#AYREGS+AR_Noise),A
 
-	ld   A,(#PT3_AddToEn)
+AddToEn: 
+;equ $+1			; ## AUTOMODIF-13 (_ADDTOEN) ; Envelopes??
+	;LD A,$3E
+	ld   A,(#_ADDTOEN)		; # chg
 	LD   E,A
 	ADD  A,A
 	SBC  A,A
@@ -1026,41 +1000,29 @@ PL2:
 	XOR  A
 	LD   HL,#CurEDel
 	OR   (HL)
+	JR   Z,ROUT_A0
+	DEC  (HL)
+	JR   NZ,ROUT
+Env_Del:	
+;equ $+1			; ## AUTOMODIF-14 (@Env_Del@) ; Envelope??
+	;LD A,$3E
+	ld   A,(#_ENVDEL)		; # chg
+	LD   (HL),A
+ESldAdd:	
+;equ $+1			; ## AUTOMODIF-15 (_ESLDADD) ; Envelope??
+	;LD HL,$2121
+	ld   HL,(#_ESLDADD)		; # chg
+	ADD  HL,DE
+	LD   (#CurESld),HL
+
+
+ROUT:	
+  XOR  A
+
+ROUT_A0:
+  ; FIJA BUG DEL MIXER
+  push AF
   
-;new from SapphiRe
-  RET  Z
-  DEC  (HL)
-  RET  NZ
-  LD   A,(#PT3_Env_Del)
-  LD   (HL),A
-  LD   HL,(#PT3_ESldAdd)
-  ADD  HL,DE
-  LD   (CurESld),HL
-  RET
-;-------------------------------------------------------------------------------
-
-
-
-;	JR   Z,ROUT_A0
-;	DEC  (HL)
-;	JR   NZ,ROUT
-;	ld   A,(#PT3_Env_Del)		; # chg
-;	LD   (HL),A
-;	ld   HL,(#PT3_ESldAdd)		; # chg
-;	ADD  HL,DE
-;	LD   (#CurESld),HL
-
-;ROUT:	
-;  XOR  A
-
-;ROUT_A0:
-
-
-
-
-; send data to AY registers
-;------------------------------------------------------------------------------- PLAY AY
-_PT3PlayAY::
   ld   A,(#AYREGS+AR_Mixer)
   AND  #0b00111111
   ld   B,A
@@ -1072,11 +1034,12 @@ _PT3PlayAY::
 	or	 B		        ; Añado Byte de B
   
   ld   (#AYREGS+AR_Mixer),A
-   
-  XOR  A
+  
+  pop  AF
   
 	ld   C,#AY0index
-	ld   HL,#AYREGS  
+	ld   HL,#AYREGS
+  
 LOUT:	
   OUT  (C),A
 	INC  C
@@ -1092,42 +1055,56 @@ LOUT:
 	INC  C
 	OUT  (C),A
 	RET
-;-------------------------------------------------------------------------------
 
+NT_DATA:
+.db (T_NEW_0-T1_)*2
+.db TCNEW_0-T_
+.db (T_OLD_0-T1_)*2+1
+.db TCOLD_0-T_
+.db (T_NEW_1-T1_)*2+1
+.db TCNEW_1-T_
+.db (T_OLD_1-T1_)*2+1
+.db TCOLD_1-T_
+.db (T_NEW_2-T1_)*2
+.db TCNEW_2-T_
+.db (T_OLD_2-T1_)*2
+.db TCOLD_2-T_
+.db (T_NEW_3-T1_)*2
+.db TCNEW_3-T_
+.db (T_OLD_3-T1_)*2
+.db TCOLD_3-T_
 
+T_:
 
-;-------------------------------------------------------------------------------
+TCOLD_0:
+.db 0x00+1,0x04+1,0x08+1,0x0A+1,0x0C+1,0x0E+1,0x12+1,0x14+1
+.db 0x18+1,0x24+1,0x3C+1,0
+TCOLD_1:
+.db 0x5C+1,0
+TCOLD_2:
+.db 0x30+1,0x36+1,0x4C+1,0x52+1,0x5E+1,0x70+1,0x82,0x8C,0x9C
+.db 0x9E,0xA0,0xA6,0xA8,0xAA,0xAC,0xAE,0xAE,0
+TCNEW_3:
+.db 0x56+1
+TCOLD_3:
+.db 0x1E+1,0x22+1,0x24+1,0x28+1,0x2C+1,0x2E+1,0x32+1,0xBE+1,0
+TCNEW_0:	
+.db 0x1C+1,0x20+1,0x22+1,0x26+1,0x2A+1,0x2C+1,0x30+1,0x54+1
+.db 0xBC+1,0xBE+1,0
+TCNEW_1 = TCOLD_1
+TCNEW_2:
+.db 0x1A+1,0x20+1,0x24+1,0x28+1,0x2A+1,0x3A+1,0x4C+1,0x5E+1
+.db 0xBA+1,0xBC+1,0xBE+1,0
 
-EMPTYSAMORN: 
+EMPTYSAMORN: ;equ $-1			; ## AUTOMODIF-16 (@EMPTYSAMORN@)
 .db 0,1,0,0x90 ;delete $90 if you don't need default sample  ; # pongo el 0 aqui
 
 
-; Kun: -tabla NOTAS, va en ROM pero podria ir en ram y asi tener todas packed y luego depack la que quiera -
+; - tabla NOTAS, va en ROM pero podria ir en ram y asi tener todas packed y luego depack la que quiera -
+		
+NT_:	;Note table 2 (if you use another in Vortex Tracker II copy it and paste
+	;it from TABLES.TXT)
 
-;Note table (if you use another in Vortex Tracker II copy it and paste it from TABLES.TXT)		
-NT_:	
-
-;Note Table 0
-;	.dw 0x0C22,0x0B73,0x0ACF,0x0A33,0x09A1,0x0917,0x0894,0x0819,0x07A4,0x0737,0x06CF,0x066D
-;	.dw 0x0611,0x05BA,0x0567,0x051A,0x04D0,0x048B,0x044A,0x040C,0x03D2,0x039B,0x0367,0x0337
-;	.dw 0x0308,0x02DD,0x02B4,0x028D,0x0268,0x0246,0x0225,0x0206,0x01E9,0x01CE,0x01B4,0x019B
-;	.dw 0x0184,0x016E,0x015A,0x0146,0x0134,0x0123,0x0112,0x0103,0x00F5,0x00E7,0x00DA,0x00CE
-;	.dw 0x00C2,0x00B7,0x00AD,0x00A3,0x009A,0x0091,0x0089,0x0082,0x007A,0x0073,0x006D,0x0067
-;	.dw 0x0061,0x005C,0x0056,0x0052,0x004D,0x0049,0x0045,0x0041,0x003D,0x003A,0x0036,0x0033
-;	.dw 0x0031,0x002E,0x002B,0x0029,0x0027,0x0024,0x0022,0x0020,0x001F,0x001D,0x001B,0x001A
-;	.dw 0x0018,0x0017,0x0016,0x0014,0x0013,0x0012,0x0011,0x0010,0x000F,0x000E,0x000D,0x000C
-
-;Note Table 1
-;	.dw 0x0EF8,0x0E10,0x0D60,0x0C80,0x0BD8,0x0B28,0x0A88,0x09F0,0x0960,0x08E0,0x0858,0x07E0
-;	.dw 0x077C,0x0708,0x06B0,0x0640,0x05EC,0x0594,0x0544,0x04F8,0x04B0,0x0470,0x042C,0x03FD
-;	.dw 0x03BE,0x0384,0x0358,0x0320,0x02F6,0x02CA,0x02A2,0x027C,0x0258,0x0238,0x0216,0x01F8
-;	.dw 0x01DF,0x01C2,0x01AC,0x0190,0x017B,0x0165,0x0151,0x013E,0x012C,0x011C,0x010A,0x00FC
-;	.dw 0x00EF,0x00E1,0x00D6,0x00C8,0x00BD,0x00B2,0x00A8,0x009F,0x0096,0x008E,0x0085,0x007E
-;	.dw 0x0077,0x0070,0x006B,0x0064,0x005E,0x0059,0x0054,0x004F,0x004B,0x0047,0x0042,0x003F
-;	.dw 0x003B,0x0038,0x0035,0x0032,0x002F,0x002C,0x002A,0x0027,0x0025,0x0023,0x0021,0x001F
-;	.dw 0x001D,0x001C,0x001A,0x0019,0x0017,0x0016,0x0015,0x0013,0x0012,0x0011,0x0010,0x000F
-
-;Note table 2
 .dw 0x0D10,0x0C55,0x0BA4,0x0AFC,0x0A5F,0x09CA,0x093D,0x08B8,0x083B,0x07C5,0x0755,0x06EC
 .dw 0x0688,0x062A,0x05D2,0x057E,0x052F,0x04E5,0x049E,0x045C,0x041D,0x03E2,0x03AB,0x0376
 .dw 0x0344,0x0315,0x02E9,0x02BF,0x0298,0x0272,0x024F,0x022E,0x020F,0x01F1,0x01D5,0x01BB
@@ -1137,14 +1114,22 @@ NT_:
 .dw 0x0034,0x0031,0x002F,0x002C,0x0029,0x0027,0x0025,0x0023,0x0021,0x001F,0x001D,0x001C
 .dw 0x001A,0x0019,0x0017,0x0016,0x0015,0x0014,0x0012,0x0011,0x0010,0x000F,0x000E,0x000D
 
-;Note Table 3
-;	.dw 0x0CDA,0x0C22,0x0B73,0x0ACF,0x0A33,0x09A1,0x0917,0x0894,0x0819,0x07A4,0x0737,0x06CF
-;	.dw 0x066D,0x0611,0x05BA,0x0567,0x051A,0x04D0,0x048B,0x044A,0x040C,0x03D2,0x039B,0x0367
-;	.dw 0x0337,0x0308,0x02DD,0x02B4,0x028D,0x0268,0x0246,0x0225,0x0206,0x01E9,0x01CE,0x01B4
-;	.dw 0x019B,0x0184,0x016E,0x015A,0x0146,0x0134,0x0123,0x0112,0x0103,0x00F5,0x00E7,0x00DA
-;	.dw 0x00CE,0x00C2,0x00B7,0x00AD,0x00A3,0x009A,0x0091,0x0089,0x0082,0x007A,0x0073,0x006D
-;	.dw 0x0067,0x0061,0x005C,0x0056,0x0052,0x004D,0x0049,0x0045,0x0041,0x003D,0x003A,0x0036
-;	.dw 0x0033,0x0031,0x002E,0x002B,0x0029,0x0027,0x0024,0x0022,0x0020,0x001F,0x001D,0x001B
-;	.dw 0x001A,0x0018,0x0017,0x0016,0x0014,0x0013,0x0012,0x0011,0x0010,0x000F,0x000E,0x000D
+; # Volume table original, a copiar a RAM
 
-
+VTcopy:	;Volume Table for Vortex Tracker II/PT3.5
+.db 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+.db 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01
+.db 0x00,0x00,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x02,0x02,0x02,0x02
+.db 0x00,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x02,0x02,0x02,0x02,0x02,0x03,0x03,0x03
+.db 0x00,0x00,0x01,0x01,0x01,0x01,0x02,0x02,0x02,0x02,0x03,0x03,0x03,0x03,0x04,0x04
+.db 0x00,0x00,0x01,0x01,0x01,0x02,0x02,0x02,0x03,0x03,0x03,0x04,0x04,0x04,0x05,0x05
+.db 0x00,0x00,0x01,0x01,0x02,0x02,0x02,0x03,0x03,0x04,0x04,0x04,0x05,0x05,0x06,0x06
+.db 0x00,0x00,0x01,0x01,0x02,0x02,0x03,0x03,0x04,0x04,0x05,0x05,0x06,0x06,0x07,0x07
+.db 0x00,0x01,0x01,0x02,0x02,0x03,0x03,0x04,0x04,0x05,0x05,0x06,0x06,0x07,0x07,0x08
+.db 0x00,0x01,0x01,0x02,0x02,0x03,0x04,0x04,0x05,0x05,0x06,0x07,0x07,0x08,0x08,0x09
+.db 0x00,0x01,0x01,0x02,0x03,0x03,0x04,0x05,0x05,0x06,0x07,0x07,0x08,0x09,0x09,0x0A
+.db 0x00,0x01,0x01,0x02,0x03,0x04,0x04,0x05,0x06,0x07,0x07,0x08,0x09,0x0A,0x0A,0x0B
+.db 0x00,0x01,0x02,0x02,0x03,0x04,0x05,0x06,0x06,0x07,0x08,0x09,0x0A,0x0A,0x0B,0x0C
+.db 0x00,0x01,0x02,0x03,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0A,0x0B,0x0C,0x0D
+.db 0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E
+.db 0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F

@@ -27,7 +27,9 @@ PT3Init
 ----------------------------------------------------------------------------- */
 void PT3Init(unsigned int,char);
 
-void PT3Play();  //Play Song. Execute on each interruption of VBLANK
+void PT3PlayAY();  //Play Song. Execute on each interruption of VBLANK
+
+void PT3Run();  //Render a frame from PT3 song 
 
 void PT3Stop();  //Stop Song.
 
