@@ -30,7 +30,16 @@
 #define  HALT __asm halt __endasm   //wait for the next interrupt
 
 
+#define BASE13 0x1B00 // base 13 sprite attribute table
+#define BASE14 0x3800 // base 14 sprite pattern table
 
+#define VDPVRAM   0x98 //VRAM Data (Read/Write)
+#define VDPSTATUS 0x99 //VDP Status Registers
+
+
+ 
+
+// ----------------------------------------------------------------------------- PT3 player
 #define VARS    0xE200
 #define AYREGS  VARS+93
 #define _PT3WRK AYREGS+256
@@ -59,12 +68,14 @@
 #define PT3_AddToEn _PT3WRK+29  //1 byte Envelope data (No cal ya que no usa Envs??)
 #define PT3_Env_Del _PT3WRK+31  //1 byte Envelope data (idem)
 #define PT3_ESldAdd _PT3WRK+32  //2 bytes Envelope data (idem) 
-
+// -----------------------------------------------------------------------------
 
 
 
 
 // Function Declarations -------------------------------------------------------
+void SetSpritesSize(char size);
+
 char PEEK(uint address);
 unsigned int PEEKW(unsigned int address);
 
@@ -77,15 +88,25 @@ char INKEY();
 void WAIT(uint cicles);
 
 
+void ShowVumeter(char channel, char value);
+
+void SetSPRITES();
+
+
+
 // constants  ------------------------------------------------------------------
 const char text01[] = "Test PT3 player Lib for SDCC";
 const char text02[] = "v1.0 (22/05/2019)";
 
 const char presskey[] = "Press a key to continue";
+
+
+
 // global variable definition --------------------------------------------------
 
+char VALUE;
 
-
+char SPRBUFFER[72];  //20*4 =72B
 
 // Functions -------------------------------------------------------------------
 
@@ -95,7 +116,15 @@ void my_isr0(void) __interrupt
 	DI;
 	READ_VDP_STATUS;
   
-  PT3PlayAY();  
+  PT3PlayAY();
+
+__asm  
+  ;vuelca a VRAM buffer atributos sprites
+  ld   HL,#_SPRBUFFER
+  ld   DE,#BASE13  
+  ld   BC,#20*4
+  call 0x005C  
+__endasm;
       
   EI;
 }
@@ -112,8 +141,9 @@ void main(void)
   
   COLOR(WHITE,DARK_BLUE,LIGHT_BLUE);
           
-  SCREEN1();
-  WIDTH(32);  
+  WIDTH(32);
+  SCREEN1();    
+  SetSpritesSize(1);  
   
   LOCATE(0,0);
   PRINT(text01);
@@ -134,6 +164,8 @@ void main(void)
   
   INKEY();
   
+  SetSPRITES();
+  
   install_isr(my_isr0);
   
   while(1)
@@ -141,6 +173,10 @@ void main(void)
     HALT;
     LOCATE(0,10);
     PrintNumber(PEEK(PT3_CrPsPtr)-33);
+    
+    ShowVumeter(0,PEEK(AYREGS+8));
+    ShowVumeter(1,PEEK(AYREGS+9));
+    ShowVumeter(2,PEEK(AYREGS+10));
     
     PT3Run();  
   }
@@ -157,7 +193,60 @@ void main(void)
 
 
 
+/* =============================================================================
+ SetSpritesSize
+ Description: Set size type for the sprites.
+ Input:       [char] size: 0=8x8; 1=16x16
+ Output:      -
+============================================================================= */ 
+void SetSpritesSize(char size) __naked
+{
+size;
+__asm
+  push IX
+  ld   IX,#0
+  add  IX,SP
+  
+  ld   HL,#RG0SAV+1 ; --- read vdp(1) from mem
+  ld   B,(HL)
 
+  ld   A,4(ix)    
+  cp   #1
+  jr   NZ,size8
+  
+  set  1,B ; 16x16
+  jr   setSize
+  
+size8:
+  res  1,B  ; 8x8    
+
+setSize:  
+  ld   C,#0x01
+  call writeVDP
+  
+  pop  IX
+  ret
+  
+  
+writeVDP:
+
+  ld   IY,#RG0SAV
+  ld   E,C
+  ld   D,#0
+  add  IY,DE
+  ld   (IY),B ;save copy of vdp value in system var
+  
+  ld   A,B
+  di
+	out	 (#VDPSTATUS),A
+	ld   A,C
+  or   #0x80            ;add 128 to VDP reg value
+  out	 (#VDPSTATUS),A
+  ei
+  ret
+
+__endasm;
+}
 
 
 
@@ -299,3 +388,148 @@ void WAIT(uint cicles)
 
 
 
+void ShowVumeter(char channel, char value)
+{
+channel;value;
+__asm
+
+  push IX
+  ld   IX,#0
+  add  IX,SP
+    
+  ld   C,4(IX)
+  ld   A,5(IX)
+
+
+;C = num channel
+;A = value  
+;showVumeter:
+
+	ld   (_VALUE),A
+
+	SLA  C
+	SLA  C
+
+	ld	 B,#0
+L00107:
+	ld	a,c
+	ld	l,a
+	rla
+	sbc	a, a
+	ld	h,a
+	add	hl,hl
+	add	hl,hl
+
+  ld   DE,#_SPRBUFFER
+  ADD  HL,DE
+  ex   DE,HL
+  
+	inc	 DE
+	inc	 DE
+
+	ld   A,(_VALUE)
+	cp	 #0
+	jr	 NZ,L00102
+	xor  A
+	ld	 (DE),A
+	jr   L00105
+  
+L00102:                       
+  ld   A,(_VALUE)
+	cp   #4
+	jr	 C,L00104
+	ld	 A,#16
+	ld	 (DE),A
+
+	ld    A,(_VALUE)
+  sub   #4
+	ld   (_VALUE),A
+	jr	 L00105
+L00104:
+  ld   A,(_VALUE)
+	add	 a,a
+	add	 a,a
+	ld	(DE),A
+	xor  A
+	ld   (_VALUE),A
+L00105:
+	inc	 C
+	inc	 B
+	ld	 A,B
+  cp   #4
+	jr	C,L00107
+  
+
+  pop  IX
+;  ret
+  
+__endasm;
+}
+
+
+
+void SetSPRITES() __naked
+{
+__asm
+
+
+  ld   HL,#SPRITE_DATA
+  ld   DE,#BASE14  
+  ld   BC,#32*5
+  call 0x005C
+
+  ld   DE,#_SPRBUFFER
+  ld   HL,#VUMETER
+  ld   BC,#64
+  ldir
+  
+  ret
+  
+
+SPRITE_DATA:
+; 0-vum0
+.db 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+.db 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+; 1-vum1
+.db 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x7F,0x7F,0x7F,0x00
+.db 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFE,0xFE,0xFE,0x00
+; 2-vum2
+.db 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x7F,0x7F,0x7F,0x00,0x7F,0x7F,0x7F,0x00
+.db 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFE,0xFE,0xFE,0x00,0xFE,0xFE,0xFE,0x00
+; 3-vum3
+.db 0x00,0x00,0x00,0x00,0x7F,0x7F,0x7F,0x00,0x7F,0x7F,0x7F,0x00,0x7F,0x7F,0x7F,0x00
+.db 0x00,0x00,0x00,0x00,0xFE,0xFE,0xFE,0x00,0xFE,0xFE,0xFE,0x00,0xFE,0xFE,0xFE,0x00
+; 4-vum4
+.db 0x7F,0x7F,0x7F,0x00,0x7F,0x7F,0x7F,0x00,0x7F,0x7F,0x7F,0x00,0x7F,0x7F,0x7F,0x00
+.db 0xFE,0xFE,0xFE,0x00,0xFE,0xFE,0xFE,0x00,0xFE,0xFE,0xFE,0x00,0xFE,0xFE,0xFE,0x00
+
+
+
+;SPRITE ATRIBUTE DATAS #########################################################
+; for adjust colors, changue the last valor in line
+
+
+;Y,X,SPR,COLOR
+VUMETER:
+.db 167,8,0,2
+.db 151,8,0,2
+.db 135,8,0,10
+.db 119,8,0,8
+
+.db 167,24,0,2
+.db 151,24,0,2
+.db 135,24,0,10             
+.db 119,24,0,8 
+
+.db 167,40,0,2
+.db 151,40,0,2
+.db 135,40,0,10
+.db 119,40,0,8
+             
+.db 167,56,0,2
+.db 151,56,0,2
+.db 135,56,0,10
+.db 119,56,0,8
+;END SPRITE ATRIBUTE DATAS #####################################################
+__endasm;
+}
