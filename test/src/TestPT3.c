@@ -23,7 +23,7 @@
 #include "../include/interrupt.h"
 #include "../include/PT3player.h"
 
-#include "../include/PT3data.h"
+#include "../include/PT3data.h"  //datas con el .PT3
 
 
 
@@ -36,39 +36,10 @@
 #define VDPVRAM   0x98 //VRAM Data (Read/Write)
 #define VDPSTATUS 0x99 //VDP Status Registers
 
-
+ 
  
 
-// ----------------------------------------------------------------------------- PT3 player
-#define VARS    0xE200
-#define AYREGS  VARS+93
-#define _PT3WRK AYREGS+256
 
-#define PT3_SETUP   _PT3WRK /* set bit0 to 1, if you want to play without LOOPING
-                                 bit7 is set each time, when loop point is passed */
-#define PT3_MODADDR _PT3WRK+1	  // 2 bytes dir musica guardada
-#define PT3_CrPsPtr _PT3WRK+3   // 2 bytes POSICION CURSOR EN PATTERN
-#define PT3_SAMPTRS _PT3WRK+5	  // 2 bytes sample info?
-#define PT3_OrnPtrs _PT3WRK+7   // 2 bytes Ornament pattern
-#define PT3_PDSP    _PT3WRK+9	  // 2 bytes pilasave
-#define PT3_CSP     _PT3WRK+11	// 2 bytes pilsave2
-#define PT3_PSP     _PT3WRK+13	// 2 bytes pilsave3
-
-#define PT3_PrNote  _PT3WRK+15  //	1
-#define PT3_PrSlide _PT3WRK+16  //	2
-                    
-#define PT3_AdInPtA _PT3WRK+18  //2 bytes play data pattern
-#define PT3_AdInPtB _PT3WRK+20  //2 bytes play data
-#define PT3_AdInPtC _PT3WRK+22  //2 bytes play data
-                    
-#define PT3_LPosPtr _PT3WRK+24  //2 bytes Pos Ptr
-#define PT3_PatsPtr _PT3WRK+26  //2 bytes Pat Ptr
-
-#define PT3_Delay   _PT3WRK+28  //1 byte delay
-#define PT3_AddToEn _PT3WRK+29  //1 byte Envelope data (No cal ya que no usa Envs??)
-#define PT3_Env_Del _PT3WRK+31  //1 byte Envelope data (idem)
-#define PT3_ESldAdd _PT3WRK+32  //2 bytes Envelope data (idem) 
-// -----------------------------------------------------------------------------
 
 
 
@@ -98,7 +69,7 @@ void SetSPRITES();
 const char text01[] = "Test PT3 player Lib for SDCC";
 const char text02[] = "v1.0 (22/05/2019)";
 
-const char presskey[] = "Press a key to continue";
+const char presskey[] = "Press a key to Play";
 
 
 
@@ -107,6 +78,9 @@ const char presskey[] = "Press a key to continue";
 char VALUE;
 
 char SPRBUFFER[72];  //20*4 =72B
+
+uint firstPATaddr;
+
 
 // Functions -------------------------------------------------------------------
 
@@ -138,6 +112,8 @@ __endasm;
 void main(void)
 {
   uint conta = 0;
+//  uint firstPATaddr;
+  uint songStep;
   
   COLOR(WHITE,DARK_BLUE,LIGHT_BLUE);
           
@@ -148,21 +124,31 @@ void main(void)
   LOCATE(0,0);
   PRINT(text01);
   PRINT("\n");
-  PRINT(text02);  
-  PRINT("\n");
+  PRINT(text02);
+    
+  PRINT("\n\n");
   
-  PRINT("\nSong name:\n ");
+  PRINT("Song name:\n ");
   PRINT(PT3_name);
-  PRINT("\nAuthor:\n ");
+  
+  PRINT("\n\n");
+  
+  PRINT("Author:\n ");
   PRINT(PT3_author);
-  PRINT("\n");
-   
   
-  //PT3Init((unsigned int) MAKISONG + 100,0);    
-  PT3Init((unsigned int) MAKISONG,0);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on 
+  //PRINT("\n\n");
   
+  LOCATE(0,10);
+  PRINT(presskey);
+     
+  //PT3Init((unsigned int) MAKISONG - 100,0);    
+  PT3Init((unsigned int) MAKISONG ,0);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on 
+  firstPATaddr = PT3_CrPsPtr; //PEEKW(PT3_CrPsPtr);
   
   INKEY();
+  
+  LOCATE(0,10);
+  PRINT("                              "); 
   
   SetSPRITES();
   
@@ -172,11 +158,15 @@ void main(void)
   {
     HALT;
     LOCATE(0,10);
-    PrintNumber(PEEK(PT3_CrPsPtr)-33);
     
-    ShowVumeter(0,PEEK(AYREGS+8));
-    ShowVumeter(1,PEEK(AYREGS+9));
-    ShowVumeter(2,PEEK(AYREGS+10));
+    songStep=PT3_CrPsPtr - firstPATaddr;   //PEEKW(PT3_CrPsPtr); 
+    //songStep -=firstPATaddr;      // <------------------------------------------ ALERT!!! SDCC falla!!!
+    PRINT("Step: ");
+    PrintNumber(songStep);   //PEEK(addr2));
+        
+    ShowVumeter(0,AYREGS[AR_AmplA]);
+    ShowVumeter(1,AYREGS[AR_AmplB]);
+    ShowVumeter(2,AYREGS[AR_AmplC]);  //PEEK(((uint) AYREGS)+AR_AmplC)
     
     PT3Run();  
   }
