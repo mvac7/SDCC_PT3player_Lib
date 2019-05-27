@@ -21,8 +21,9 @@
 
 #include "../include/textmode.h"
 #include "../include/interrupt.h"
-#include "../include/PT3player.h"
 
+#include "../include/PT3player.h"
+#include "../include/PT3player_NoteTable2.h"
 #include "../include/PT3data.h"  //datas con el .PT3
 
 
@@ -48,9 +49,9 @@
 void SetSpritesSize(char size);
 
 char PEEK(uint address);
-unsigned int PEEKW(unsigned int address);
-
 void POKE(uint address, char value);
+
+void CopyMEM(unsigned int source, unsigned int destination, unsigned int length);
 
 char VPEEK(uint address);
 
@@ -140,10 +141,12 @@ void main(void)
   
   LOCATE(0,10);
   PRINT(presskey);
+  
+  CopyMEM((unsigned int) NT,(unsigned int) NoteTable,96*2);
      
-  //PT3Init((unsigned int) MAKISONG - 100,0);    
+  //PT3Init((unsigned int) MAKISONG - 100,0); // Subtract 100 if you delete the header of the PT3 file.    
   PT3Init((unsigned int) MAKISONG ,0);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on 
-  firstPATaddr = PT3_CrPsPtr; //PEEKW(PT3_CrPsPtr);
+  firstPATaddr = PT3_CrPsPtr;
   
   INKEY();
   
@@ -159,16 +162,15 @@ void main(void)
     HALT;
     LOCATE(0,10);
     
-    songStep=PT3_CrPsPtr - firstPATaddr;   //PEEKW(PT3_CrPsPtr); 
-    //songStep -=firstPATaddr;      // <------------------------------------------ ALERT!!! SDCC falla!!!
+    songStep=PT3_CrPsPtr - firstPATaddr;
     PRINT("Step: ");
-    PrintNumber(songStep);   //PEEK(addr2));
+    PrintNumber(songStep);
         
     ShowVumeter(0,AYREGS[AR_AmplA]);
     ShowVumeter(1,AYREGS[AR_AmplB]);
-    ShowVumeter(2,AYREGS[AR_AmplC]);  //PEEK(((uint) AYREGS)+AR_AmplC)
+    ShowVumeter(2,AYREGS[AR_AmplC]);
     
-    PT3Run();  
+    PT3Decode();  
   }
 
 /*  
@@ -262,26 +264,6 @@ __endasm;
 
 
 
-unsigned int PEEKW(unsigned int address)
-{
-address;
-__asm
-  push IX
-  ld   IX,#0
-  add  IX,SP
-     
-  ld   L,4(IX)
-  ld   H,5(IX)
-  ld   E,(HL)
-  inc  HL
-  ld   D,(HL)
-  ex   DE,HL
-  
-  pop  IX
-__endasm;
-}
-
-
 void POKE(uint address, char value)
 {
 address;value;
@@ -298,6 +280,41 @@ __asm
   pop  IX  
 __endasm;
 }
+
+
+
+/* =============================================================================
+   CopyMEM
+ 
+   Function : Copy a block of memory to another address.
+   Input    : [unsigned int] Source memory address
+              [unsigned int] Destination RAM address
+              [unsigned int] length 
+   Output   : -
+============================================================================= */
+void CopyMEM(unsigned int source, unsigned int destination, unsigned int length)
+{
+source;destination;length;
+__asm
+  push IX
+  ld   IX,#0
+  add  IX,SP
+  
+  ld   L,4(IX)
+  ld   H,5(IX) ;source memory address
+  
+  ld   E,6(IX)
+  ld   D,7(IX) ;Destination RAM address
+  
+  ld   C,8(IX)
+  ld   B,9(IX) ;length
+  
+  ldir
+  
+  pop  IX
+__endasm;
+}
+
 
 
 

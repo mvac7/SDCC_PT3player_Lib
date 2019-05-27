@@ -148,11 +148,17 @@ extern char PT3_AddToEn;          //Envelope data (No cal ya que no usa Envs??)
 extern char PT3_Env_Del;          //Envelope data (idem)
 extern unsigned int PT3_ESldAdd;  //Envelope data (idem)
 
+extern unsigned int NoteTable[96];  //Note table
+
+
+
+
+
 
 
 /* -----------------------------------------------------------------------------
 PT3Init
-(unsigned int) Song data address
+(unsigned int) Song data address. Subtract 100 if you delete the header of the PT3 file.
 (char) Loop - 0=off ; 1=on  (false = 0, true = 1));
 ----------------------------------------------------------------------------- */
 void PT3Init(unsigned int,char);
@@ -167,7 +173,7 @@ Execute on each interruption of VBLANK
 void PT3PlayAY();
 
 
-void PT3Run();     //decode a frame from PT3 song 
+void PT3Decode();     //decode a frame from PT3 song 
 
 
 void PT3Stop();    //Stop/Mute Song.
@@ -184,6 +190,11 @@ void PT3Stop();    //Stop/Mute Song.
 //void muteChannelA(char value);
 //void muteChannelB(char value);
 //void muteChannelC(char value);
+
+
+
+
+
 
 
 #endif

@@ -4,7 +4,7 @@
 1.1
 
 #### Date: 
-23/05/2019
+27/05/2019
 
 #### Architecture: 
 MSX
@@ -17,7 +17,7 @@ C & Assembler
 - Vortex Tracker II v1.0 PT3 player for ZX Spectrum by S.V.Bulba <vorobey@mail.khstu.ru> http://bulba.at.kz
 - Adapted to MSX by Alfonso D. C. aka Dioniso <dioniso072@yahoo.es>
 - Arrangements for MSX ROM: MSXKun/Paxanga soft > http://paxangasoft.retroinvaders.com/
-- Improvements and latest changes: SapphiRe > http://www.z80st.es/
+- asMSX version: SapphiRe > http://www.z80st.es/
 - Adapted to SDCC: mvac7/303bcn > <mvac7303b@gmail.com>
 
 #### In Test/Example software:
@@ -27,21 +27,29 @@ C & Assembler
   by Makinavaja 
 
 
-#### asMSX player (by SapphiRe):        
+#### asMSX PT3 player (by SapphiRe):        
 http://www.z80st.es/blog/2008/11/19a-nueva-version-del-replayer-de-pt3        
 
 
-### History of versions:
+## Sorry!: This text is pending correction of the English translation. <<<<<<<<
 
-- 
+
+### History of versions:
+- 1.1 (27/05/2019) <<current version>> Adaptation to SDCC of asMSX version by SapphiRe.
+- 1.0 (21/10/2016) Adaptation to SDCC of the ROM version by Kun.
 
 
 ## 1. Introduction
 
+Adaptation of the PT3 Player to be used in software development in C (SDCC). 
+
+Allows access to player variables.
+
+To allow to assign a Note Table externally, we have it in RAM.  
+
+Include an example application for testing and learning purposes.
 
 
-  
-Includes applications for testing and learning purposes.
 
 
 ## 2. License
@@ -85,13 +93,25 @@ For C:
  * Hex2bin v2.2 > http://hex2bin.sourceforge.net/
 
  * Vortex Tracker II > https://bulba.untergrund.net/vortex_e.htm
-   (for create a PT3 song)
+   (for create PT3 songs)
 
 
 
 ## 5. Functions
 
-* void PT3Init(unsigned int,char) Init Song: (unsigned int) Song data address ;(char) Loop - 0=off ; 1=on
-* void PT3Run() Render a frame from PT3 Song.
+* void PT3Init(unsigned int, char) Init Song: (unsigned int) Song data address ;(char) Loop - 0=off ; 1=on
+* void PT3Decode() Decode a frame from PT3 Song.
 * void PT3PlayAY() Play Song. Execute on each interruption of VBLANK.
 * void PT3Stop() Stop Song.
+
+
+## 6. How to use
+
+Follow the next steps:
+
+1) Assign the table of notes that corresponds to the one used in the song. 
+2) Initialize the song to sound with PT3Init.
+3) At each VBLANK interrupt, execute PT3PlayAY(). This function dumps the AY 
+record values and makes it sound.
+4) Execute PT3Decode() in your code in each frame, to process the song data.
+5) Hit PT3Stop(), when you need to stop the song.
