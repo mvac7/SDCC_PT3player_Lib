@@ -1,23 +1,39 @@
-/*
- - - - - - - - - - - - - - - - - - -  PT3  Replayer  - - - - - - - - - - - - - - - - - -
+/* =============================================================================
+   SDCC Vortex Tracker II PT3 player for MSX
 
+   Version: 1.1
+   Date: 28/05/2019
+   Architecture: MSX
+   Format: C Object (SDCC .rel)
+   Programming language: C
+   WEB: 
+   mail: mvac7303b@gmail.com
 
-Vortex Tracker II v1.0 PT3 player for MSX
+   Authors:
+    - Vortex Tracker II v1.0 PT3 player for ZX Spectrum by S.V.Bulba 
+      <vorobey@mail.khstu.ru> http://bulba.at.kz
+    - (09-Jan-05) Adapted to MSX by Alfonso D. C. aka Dioniso 
+      <dioniso072@yahoo.es>
+    - Arrangements for MSX ROM: MSXKun/Paxanga soft > 
+      http://paxangasoft.retroinvaders.com/
+    - asMSX version: SapphiRe > http://www.z80st.es/
+    - Adapted to SDCC: mvac7/303bcn > <mvac7303b@gmail.com>
 
- Authors:
-- Vortex Tracker II v1.0 PT3 player for ZX Spectrum by S.V.Bulba <vorobey@mail.khstu.ru> http://bulba.at.kz
-- (09-Jan-05) Adapted to MSX by Alfonso D. C. aka Dioniso <dioniso072@yahoo.es>
-- Arrangements for MSX ROM: MSXKun/Paxanga soft > http://paxangasoft.retroinvaders.com/
-- asMSX version: SapphiRe > http://www.z80st.es/
-- Adapted to SDCC: mvac7/303bcn > <mvac7303b@gmail.com>
-
-
+   Description:
+     Adaptation of the Vortex Tracker II PT3 Player for MSX to be used in 
+     software development in C (SDCC). 
+     
+   History of versions:
+    - 1.1 (28/05/2019) <current version> Adaptation to SDCC of asMSX 
+                                         version by SapphiRe.
+    - 1.0 (21/10/2016) Adaptation to SDCC of the ROM version by Kun.
 
 In this replayer:
 
 Dioniso version:
  - No version detection (just for Vortex Tracker II and PT3.5).
- - No frequency table decompression (default is number 2). - Coger tabla segun quiera, en fichero aparte
+ - No frequency table decompression (default is number 2). 
+   Coger tabla segun quiera, en fichero aparte
  - No volume table decompression (Vortex Tracker II/PT3.5 volume table used).
 
 
@@ -33,10 +49,9 @@ SapphiRe version:
 
 
 mvac7 version:
+ Adaptation to C (SDCC) of the SapphiRe version.
 
-
-  
-*/
+============================================================================= */
 
 
 #include "../include/PT3player.h"
@@ -103,6 +118,7 @@ char PT3_Env_Del;          //Envelope data (idem)
 unsigned int PT3_ESldAdd;  //Envelope data (idem)
 
 
+char NoteTable[192];       //Note table
 
 
 
@@ -115,17 +131,17 @@ unsigned int PT3_ESldAdd;  //Envelope data (idem)
 
 
 /* -----------------------------------------------------------------------------
-Stop/Mute Song.
+PT3Mute
+Silence the PSG.
 ----------------------------------------------------------------------------- */
-void PT3Stop() __naked
+void PT3Mute() __naked
 {
 __asm
 MUTE:	
   XOR  A
-	LD   H,A
-	LD   L,A
 	LD   (#_AYREGS+AR_AmplA),A
-	LD   (#_AYREGS+AR_AmplB),HL
+	LD   (#_AYREGS+AR_AmplB),A
+  LD   (#_AYREGS+AR_AmplC),A
 	JP   _PT3PlayAY                ;ROUT_A0
   
 __endasm;
@@ -351,10 +367,9 @@ __endasm;
 
 
 /* -----------------------------------------------------------------------------
-PT3Run
-decode a frame from PT3 song
+PT3Decode
+Decode a frame from PT3 song
 ----------------------------------------------------------------------------- */
-//_PT3Run::
 void PT3Decode() __naked
 {
 __asm   
@@ -1029,12 +1044,12 @@ EMPTYSAMORN:
 
 
 
-	
-;NoteTable:	
-
-;To allow to assign a table externally, we have it in RAM.
+; As there are four tables of notes available in Vortex Tracker, 
+; this must be assigned externally, copying to the space reserved in the 
+; variable NoteTable.
 
 ;Note table 2
+;NoteTable:	
 ;  .dw 0x0D10,0x0C55,0x0BA4,0x0AFC,0x0A5F,0x09CA,0x093D,0x08B8,0x083B,0x07C5,0x0755,0x06EC
 ;  .dw 0x0688,0x062A,0x05D2,0x057E,0x052F,0x04E5,0x049E,0x045C,0x041D,0x03E2,0x03AB,0x0376
 ;  .dw 0x0344,0x0315,0x02E9,0x02BF,0x0298,0x0272,0x024F,0x022E,0x020F,0x01F1,0x01D5,0x01BB

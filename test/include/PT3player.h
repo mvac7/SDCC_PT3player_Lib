@@ -1,21 +1,57 @@
 /* =============================================================================
-   PTplayer.h
+   SDCC Vortex Tracker II PT3 player for MSX
+
+   Version: 1.1
+   Date: 28/05/2019
+   Architecture: MSX
+   Format: C Object (SDCC .rel)
+   Programming language: C
+   WEB: 
+   mail: mvac7303b@gmail.com
+
+   Authors:
+    - Vortex Tracker II v1.0 PT3 player for ZX Spectrum by S.V.Bulba 
+      <vorobey@mail.khstu.ru> http://bulba.at.kz
+    - (09-Jan-05) Adapted to MSX by Alfonso D. C. aka Dioniso 
+      <dioniso072@yahoo.es>
+    - Arrangements for MSX ROM: MSXKun/Paxanga soft > 
+      http://paxangasoft.retroinvaders.com/
+    - asMSX version: SapphiRe > http://www.z80st.es/
+    - Adapted to SDCC: mvac7/303bcn > <mvac7303b@gmail.com>
 
    Description:
-   library for play PT3 songs in SDCC
-   Adaptación de la versión para MSX de MSXKun/Paxanga soft
-   
-   In this replayer:
-   -No version detection (just for Vortex Tracker II and PT3.5).
-   -No frequency table decompression (default is number 2). - Coger tabla segun quiera, en fichero aparte
-   -No volume table decompression (Vortex Tracker II/PT3.5 volume table used).
+     Adaptation of the Vortex Tracker II PT3 Player for MSX to be used in 
+     software development in C (SDCC). 
+     
+   History of versions:
+    - 1.1 (28/05/2019) <current version> Adaptation to SDCC of asMSX 
+                                         version by SapphiRe.
+    - 1.0 (21/10/2016) Adaptation to SDCC of the ROM version by Kun.
 
-   Warning!!! Delete 100 first bytes (header) from your PT3 module or add 100 to data addres. <<<<<<<<<<<<<<<<<<<<<< #####################
+In this replayer:
 
-   - New added-
+Dioniso version:
+ - No version detection (just for Vortex Tracker II and PT3.5).
+ - No frequency table decompression (default is number 2). 
+   Coger tabla segun quiera, en fichero aparte
+ - No volume table decompression (Vortex Tracker II/PT3.5 volume table used).
 
-   Usable desde ROM (solo tiene en RAM area de trabajo, lo minimo posible).
- ============================================================================ */
+
+msxKun version:
+ - Usable desde ROM (solo tiene en RAM area de trabajo, lo minimo posible).
+
+SapphiRe version:
+ This version of the replayer uses a fixed volume and note table, if you need a 
+ different note table you can copy it from TABLES.TXT file, distributed with the
+ original PT3 distribution. This version also allows the use of PT3 commands.
+
+ PLAY and PSG WRITE routines seperated to allow independent calls
+
+
+mvac7 version:
+ Adaptation to C (SDCC) of the SapphiRe version.
+ 
+============================================================================= */
 #ifndef  __PT3_PLAYER_H__
 #define  __PT3_PLAYER_H__
 
@@ -101,16 +137,16 @@ extern char DelyCnt;
 extern unsigned int CurESld;		
 extern char CurEDel;
 
+
 //Ns_Base_AddToNs:
 extern char Ns_Base;		
 extern char AddToNs;		
 
 
-//AYREGS::
-//char VT_[14];
 extern char AYREGS[14];
 extern unsigned int EnvBase;
 extern char VAR0END[240];
+
 
 
 /* --- Workarea --- (apunta a RAM que estaba antes en codigo automodificable)
@@ -148,7 +184,9 @@ extern char PT3_AddToEn;          //Envelope data (No cal ya que no usa Envs??)
 extern char PT3_Env_Del;          //Envelope data (idem)
 extern unsigned int PT3_ESldAdd;  //Envelope data (idem)
 
-extern unsigned int NoteTable[96];  //Note table
+
+extern char NoteTable[192];       //Note table
+//extern unsigned int NoteTable[96];  //Note table
 
 
 
@@ -173,10 +211,19 @@ Execute on each interruption of VBLANK
 void PT3PlayAY();
 
 
-void PT3Decode();     //decode a frame from PT3 song 
+/* -----------------------------------------------------------------------------
+PT3Decode
+Decode a frame from PT3 song
+----------------------------------------------------------------------------- */
+void PT3Decode(); 
 
 
-void PT3Stop();    //Stop/Mute Song.
+/* -----------------------------------------------------------------------------
+PT3Mute
+Silence the PSG.
+----------------------------------------------------------------------------- */
+void PT3Mute();
+
 
 //void PT3Loop(char);  //0=off ; 1=on  (false = 0, true = 1)
 
