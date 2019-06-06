@@ -24,7 +24,7 @@
 
 #include "../include/PT3player.h"
 #include "../include/PT3player_NoteTable2.h"
-#include "../include/PT3data.h"  //datas con el .PT3
+#include "../include/A_funny_day_with_my_MSX.PT3.h"  //datas con el .PT3
 
 
 
@@ -141,12 +141,12 @@ void main(void)
   PRINT("\n\n");
   
   PRINT("Song name:\n ");
-  PRINT(PT3_name);
+  PRINT(Song_name);
   
   PRINT("\n\n");
   
   PRINT("Author:\n ");
-  PRINT(PT3_author);
+  PRINT(Song_author);
   
   //PRINT("\n\n");
   
@@ -155,8 +155,8 @@ void main(void)
   
   CopyMEM((unsigned int) NT,(unsigned int) NoteTable,96*2);   //Copy Note Table to the space reserved
      
-  //PT3Init((unsigned int) MAKISONG - 100,0); // Subtract 100 if you delete the header of the PT3 file.    
-  PT3Init((unsigned int) MAKISONG ,0);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on 
+  //PT3Init((unsigned int) SONG00 - 100,0); // Subtract 100 if you delete the header of the PT3 file.    
+  PT3Init((unsigned int) SONG00 ,0);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on 
   _isPT3play=1;
   
   firstPATaddr = PT3_CrPsPtr;
