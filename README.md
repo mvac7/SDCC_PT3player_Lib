@@ -25,7 +25,8 @@ http://www.z80st.es/blog/2008/11/19a-nueva-version-del-replayer-de-pt3
 
 
 ## History of versions:
-- 1.1 (28/05/2019) <current version> Adaptation to SDCC of asMSX version by SapphiRe.
+- 1.2 (04/01/2021)>assignment of frequency table memory address to NoteTable (#2)
+- 1.1 (28/05/2019) Adaptation to SDCC of asMSX version by SapphiRe.
 - 1.0 (21/10/2016) Adaptation to SDCC of the ROM version by Kun.
 
 
@@ -54,10 +55,10 @@ Vortex Tracker II v1.0 PT3 player (c) 2004 S.V.Bulba
 
 ## Acknowledgments
   
-Thanks for information, help or your contribution to the MSX community:
+I want to give a special thanks to all those who freely share their knowledge with the MSX developer community.
 
 * S.V.Bulba > [WEB](http://bulba.at.kz)
-* Dioniso 
+* Alfonso D. C. aka Dioniso
 * MSXKun/Paxanga soft > [WEB](http://paxangasoft.retroinvaders.com/)
 * Sapphire/Z80ST > [WEB](http://z80st.auic.es/)
 * Avelino Herrera > [WEB](http://msx.atlantes.org/index_es.html)
@@ -69,7 +70,7 @@ Thanks for information, help or your contribution to the MSX community:
 * Fernando García > [youTube](https://www.youtube.com/user/bitvision)
 * Eric Boez > [gitHub](https://github.com/ericb59)
 * MSX Assembly Page > [WEB](http://map.grauw.nl/resources/msxbios.php)
-* Portar MSX Tech Doc > [WEB](http://nocash.emubase.de/portar.htm)
+* Portar MSX Tech Doc > [WEB](https://problemkaputt.de/portar.htm)
 * MSX Resource Center > [WEB](http://www.msx.org/)
 * Karoshi MSX Community (RIP 2007-2020)
 * BlueMSX emulator >> [WEB](http://www.bluemsx.com/)
@@ -78,9 +79,8 @@ Thanks for information, help or your contribution to the MSX community:
 
 
 
-## Requirements
 
-For C:
+## Requirements
 
 * Small Device C Compiler (SDCC) v3.9 http://sdcc.sourceforge.net/
 * Hex2bin v2.5 http://hex2bin.sourceforge.net/ 

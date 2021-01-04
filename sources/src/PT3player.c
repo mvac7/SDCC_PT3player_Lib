@@ -1,13 +1,10 @@
 /* =============================================================================
    SDCC Vortex Tracker II PT3 player for MSX
 
-   Version: 1.1
-   Date: 28/05/2019
+   Version: 1.2 (04/01/2021)
    Architecture: MSX
    Format: C Object (SDCC .rel)
-   Programming language: C
-   WEB: 
-   mail: mvac7303b@gmail.com
+   Programming language: C and Z80 assembler
 
    Authors:
     - Vortex Tracker II v1.0 PT3 player for ZX Spectrum by S.V.Bulba 
@@ -24,8 +21,8 @@
      software development in C (SDCC). 
      
    History of versions:
-    - 1.1 (28/05/2019) <current version> Adaptation to SDCC of asMSX 
-                                         version by SapphiRe.
+    - 1.2 (04/01/2021)>assignment of frequency table memory address to NoteTable 
+    - 1.1 (28/05/2019) Adaptation to SDCC of asMSX version by SapphiRe.
     - 1.0 (21/10/2016) Adaptation to SDCC of the ROM version by Kun.
 
 In this replayer:
@@ -118,7 +115,7 @@ char PT3_Env_Del;          //Envelope data (idem)
 unsigned int PT3_ESldAdd;  //Envelope data (idem)
 
 
-char NoteTable[192];       //Note table
+unsigned char NoteTable;   //note table memory address
 
 
 
@@ -666,7 +663,7 @@ C_PORTM:
 	INC  BC
 	LD   -12+CHNPRM_TnSlDl(IX),A
 	LD   -12+CHNPRM_TSlCnt(IX),A
-	LD   DE,#_NoteTable
+	LD   DE,(#_NoteTable)
 	LD   A,-12+CHNPRM_Note(IX)
 	LD   -12+CHNPRM_SlToNt(IX),A
 	ADD  A,A
@@ -905,7 +902,7 @@ CH_NOAC:
 	EX   AF,AF
 	LD   L,A
 	LD   H,#0
-	LD   SP,#_NoteTable
+	LD   SP,(#_NoteTable)
 	ADD  HL,SP
 	LD   SP,HL
 	POP  HL

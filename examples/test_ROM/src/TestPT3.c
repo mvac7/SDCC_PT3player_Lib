@@ -1,18 +1,16 @@
 /* =============================================================================
-  Test PT3 player Library for SDCC (object type)
-  Version: 1.0 (28/5/2019)
-  Author: (test program) mvac7/303bcn
+  Test PT3 player Library for SDCC
+  Version: 1.1 (04/01/2021)
+  Author: (test program) mvac7 <mvac7303b@gmail.com>
   Architecture: MSX
-  Format: C Object (SDCC .rel)
-  Programming language: C
-  WEB: 
-  mail: mvac7303b@gmail.com
+  Format: ROM 8K
+  Programming language: C and Z80 assembler
    
   Description:
 
     
   History of versions:
-
+    - 1.0 (28/5/2019)
 ============================================================================= */
 
 #include "../include/newTypes.h"
@@ -72,7 +70,7 @@ void PT3Stop();
 
 // constants  ------------------------------------------------------------------
 const char text01[] = "Test PT3 player Lib for SDCC";
-const char text02[] = "v1.0 (28/05/2019)";
+const char text02[] = "v1.1 (04/01/2021)";
 
 const char presskey[] = "Press a key to Play";
 
@@ -153,7 +151,8 @@ void main(void)
   LOCATE(0,10);
   PRINT(presskey);
   
-  CopyMEM((unsigned int) NT,(unsigned int) NoteTable,96*2);   //Copy Note Table to the space reserved
+  //CopyMEM((unsigned int) NT,(unsigned int) NoteTable,96*2);   //Copy Note Table to the space reserved
+  NoteTable = (unsigned int) NT;
      
   //PT3Init((unsigned int) SONG00 - 100,0); // Subtract 100 if you delete the header of the PT3 file.    
   PT3Init((unsigned int) SONG00 ,0);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on 
@@ -287,7 +286,7 @@ __endasm;
 
 
 
-char PEEK(uint address)
+char PEEK(uint address) __naked
 {
 address;
 __asm
@@ -301,12 +300,13 @@ __asm
 
   ld   L,A
   pop  IX
+  ret
 __endasm;
 }
 
 
 
-void POKE(uint address, char value)
+void POKE(uint address, char value) __naked
 {
 address;value;
 __asm
@@ -319,7 +319,8 @@ __asm
   ld   A,6(IX)
   ld   (HL),A
 
-  pop  IX  
+  pop  IX
+  ret  
 __endasm;
 }
 
@@ -334,7 +335,7 @@ __endasm;
               [unsigned int] length 
    Output   : -
 ============================================================================= */
-void CopyMEM(unsigned int source, unsigned int destination, unsigned int length)
+/*void CopyMEM(unsigned int source, unsigned int destination, unsigned int length) __naked
 {
 source;destination;length;
 __asm
@@ -354,13 +355,14 @@ __asm
   ldir
   
   pop  IX
+  ret
 __endasm;
-}
+}*/
 
 
 
 
-char VPEEK(uint address)
+char VPEEK(uint address) __naked
 {
 address;
 __asm
@@ -375,6 +377,7 @@ __asm
   
   ld   L,A
   pop  IX
+  ret
 __endasm;
 }
 
@@ -383,10 +386,12 @@ __endasm;
 /* =============================================================================
 One character input (waiting)
 ============================================================================= */
-char INKEY(){
+char INKEY() __naked
+{
 __asm   
    call CHGET
    ld   L,A
+   ret
 __endasm;
 }
 
@@ -418,7 +423,7 @@ void WAIT(uint cicles)
    Input    : [char] line 
    Output   : [char] state of the keys. 1 = not pressed; 0 = pressed
 ============================================================================= */
-char GetKeyMatrix(char line)
+char GetKeyMatrix(char line) __naked
 {
 line;
 __asm
@@ -433,6 +438,7 @@ __asm
   ld   L,A
   
   pop  IX
+  ret
 __endasm;
 }
 
