@@ -10,6 +10,7 @@
 
     
   History of versions:
+    - 1.1 (04/01/2021) assigning the frequency table to NoteTable
     - 1.0 (28/5/2019)
 ============================================================================= */
 
@@ -26,7 +27,7 @@
 
 
 
-#define  HALT __asm halt __endasm   //wait for the next interrupt
+#define  HALT __asm halt __endasm   //Z80 instruction: wait for the next interrupt
 
 
 #define BASE13 0x1B00 // base 13 sprite attribute table
@@ -49,7 +50,7 @@ void SetSpritesSize(char size);
 char PEEK(uint address);
 void POKE(uint address, char value);
 
-void CopyMEM(unsigned int source, unsigned int destination, unsigned int length);
+//void CopyMEM(unsigned int source, unsigned int destination, unsigned int length);
 
 char VPEEK(uint address);
 

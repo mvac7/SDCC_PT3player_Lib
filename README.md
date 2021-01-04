@@ -107,3 +107,34 @@ Follow the next steps:
 4) Execute **PT3Decode** in your code in each frame, to process the song data.
 5) As you want to stop the playback of the song, execute **PT3Mute** and stop calling **PT3Decode**.
 6) To play another song, repeat these steps starting with number 2.
+
+
+### Example code
+
+```
+#include "../include/PT3player.h"
+#include "../include/PT3player_NoteTable2.h"
+#include "../include/songdata.PT3.h"
+
+
+#define  HALT __asm halt __endasm   //Z80 instruction: wait for the next interrupt
+
+void main(void)
+{
+
+    NoteTable = (unsigned int) NT;
+    PT3Init((unsigned int) SONG00 ,0);
+    
+    while(1)
+    {
+      HALT;
+
+      PT3PlayAY();      
+      PT3Decode();
+      
+      //your code here --->
+            
+    }
+    
+}
+```
