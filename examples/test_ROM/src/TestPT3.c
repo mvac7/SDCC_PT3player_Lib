@@ -1,6 +1,6 @@
 /* =============================================================================
   Test PT3 player Library for SDCC
-  Version: 1.1 (04/01/2021)
+  Version: 1.2 (05/01/2021)
   Author: (test program) mvac7 <mvac7303b@gmail.com>
   Architecture: MSX
   Format: ROM 8K
@@ -10,6 +10,7 @@
 
     
   History of versions:
+    - 1.2 (05/01/2021) Updates related to v1.3 of the PT3player Lib
     - 1.1 (04/01/2021) assigning the frequency table to NoteTable
     - 1.0 (28/5/2019)
 ============================================================================= */
@@ -18,6 +19,7 @@
 #include "../include/msxSystemVariables.h"
 #include "../include/msxBIOS.h"
 
+#include "../include/keyboard.h"
 #include "../include/textmode.h"
 #include "../include/interrupt.h"
 
@@ -54,11 +56,7 @@ void POKE(uint address, char value);
 
 char VPEEK(uint address);
 
-char INKEY();
-
 void WAIT(uint cicles);
-
-char GetKeyMatrix(char line);
 
 
 void ShowVumeter(char channel, char value);
@@ -70,8 +68,8 @@ void PT3Stop();
 
 
 // constants  ------------------------------------------------------------------
-const char text01[] = "Test PT3 player Lib for SDCC";
-const char text02[] = "v1.1 (04/01/2021)";
+const char text01[] = "Test PT3player v1.3 Lib";
+const char text02[] = "v1.2 (05/01/2021)";
 
 const char presskey[] = "Press a key to Play";
 
@@ -83,9 +81,7 @@ char VALUE;
 
 char SPRBUFFER[72];  //20*4 =72B
 
-boolean keyB7semaphore;
-
-char _isPT3play;
+boolean Row7pressed;
 
 uint firstPATaddr;
 
@@ -98,7 +94,7 @@ void my_isr0(void) __interrupt
 	DI;
 	READ_VDP_STATUS;
   
-  PT3PlayAY();
+    PT3_PlayAY();
 
 __asm  
   ;vuelca a VRAM buffer atributos sprites
@@ -124,7 +120,7 @@ void main(void)
   uint conta = 0;
   uint songStep;
   
-  keyB7semaphore=false;
+  Row7pressed=false;
   
   COLOR(WHITE,DARK_BLUE,LIGHT_BLUE);
           
@@ -156,15 +152,16 @@ void main(void)
   NoteTable = (unsigned int) NT;
      
   //PT3Init((unsigned int) SONG00 - 100,0); // Subtract 100 if you delete the header of the PT3 file.    
-  PT3Init((unsigned int) SONG00 ,0);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on 
-  _isPT3play=1;
+  PT3_InitSong((unsigned int) SONG00, Loop_OFF);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on 
   
   firstPATaddr = PT3_CrPsPtr;
   
   INKEY();
   
   LOCATE(0,10);
-  PRINT("Press STOP for mute the song"); 
+  PRINT("STOP for Pause the song playback");
+  LOCATE(0,11);
+  PRINT("RETURN for Resume song playback"); 
   
   SetSPRITES();
   
@@ -173,9 +170,9 @@ void main(void)
   while(1)
   {
     HALT;
-    LOCATE(0,12);
     
     songStep=PT3_CrPsPtr - firstPATaddr;
+    LOCATE(0,13);    
     PRINT("Step: ");
     PrintNumber(songStep);
         
@@ -183,26 +180,27 @@ void main(void)
     ShowVumeter(1,AYREGS[AR_AmplB]);
     ShowVumeter(2,AYREGS[AR_AmplC]);
     
+       
     
-    
-
-    keyPressed = GetKeyMatrix(7);  
-    if (keyPressed!=0xFF)  //pressure control of the keys
+    // Keyboard row 7
+    keyPressed = GetKeyMatrix(7);
+    if (keyPressed!=0xFF)
     {
-      if(keyB7semaphore==false)
+      if(Row7pressed==false)
       {
-        if (keyPressed==0b11101111)  //STOP Key
-        {
-          keyB7semaphore=true;
-          PT3Stop(); 
-        }          
+        //if (!(keyPressed&Bit0)) {Row7pressed=true;}; // [F4]
+        //if (!(keyPressed&Bit1)) {Row7pressed=true;}; // [F5]
+        //if (!(keyPressed&Bit2)) {Row7pressed=true;}; // [ESC]
+        //if (!(keyPressed&Bit3)) {Row7pressed=true;}; // [TAB]
+        if (!(keyPressed&Bit4)) {Row7pressed=true;PT3_Pause();}; // [STOP]
+        //if (!(keyPressed&Bit5)) {Row7pressed=true;}; // [BS]
+        //if (!(keyPressed&Bit6)) {Row7pressed=true;}; // [SELECT]
+        if (!(keyPressed&Bit7)) {Row7pressed=true;PT3_Resume();}; // [RETURN]
       }      
-    }else{
-      keyB7semaphore=false;        
-    }
+    }else Row7pressed=false;
     
     
-    if(_isPT3play==1) PT3Decode();
+    PT3_Decode();
 
     
   }
@@ -217,14 +215,6 @@ void main(void)
 }
 
 
-
-void PT3Stop()
-{
-  if(_isPT3play==1){
-    _isPT3play = 0;
-    PT3Mute();
-  }else _isPT3play = 1;  
-}
 
 
 /* =============================================================================
@@ -385,20 +375,6 @@ __endasm;
 
 
 /* =============================================================================
-One character input (waiting)
-============================================================================= */
-char INKEY() __naked
-{
-__asm   
-   call CHGET
-   ld   L,A
-   ret
-__endasm;
-}
-
-
-
-/* =============================================================================
    WAIT
    Generates a pause in the execution of n interruptions.
    PAL: 50=1second. ; NTSC: 60=1second.
@@ -411,72 +387,6 @@ void WAIT(uint cicles)
   for(i=0;i<cicles;i++) HALT;
   return;
 }
-
-
-
-/* =============================================================================
-   GetKeyMatrix
-
-   Function : Returns the value of the specified line from the keyboard matrix.
-              Each line provides the status of 8 keys.
-              To know which keys correspond, you will need documentation that 
-              includes a keyboard table.
-   Input    : [char] line 
-   Output   : [char] state of the keys. 1 = not pressed; 0 = pressed
-============================================================================= */
-char GetKeyMatrix(char line) __naked
-{
-line;
-__asm
-  push IX
-  ld   IX,#0
-  add  IX,SP
-     
-  ld   A,4(IX)
-  
-  call SNSMAT
-  
-  ld   L,A
-  
-  pop  IX
-  ret
-__endasm;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*void testPRINT()
-{
-  PRINT(">Test PRINT():\n");
-  PRINT(testString);
-  PRINT("\n\n>Test PRINT() with Escape Sequences:");
-  PRINT("\n\tLine 1\n\tLine 2\n\tLine 3"); // \t Horizontal Tab
-  PRINT("\r");  // Carriage Return
-  PRINT(">\n");
-  PRINT("\\");  // Backslash
-  PRINT("\a");  // Beep
-  PRINT("\n");  // Newline
-  //PRINT("\f");  // Formfeed (CLS)
-  //PRINT("\v");  // Place the cursor at the top of the screen
-  PRINT("\'Single quotation mark\'\n");  // Single quotation mark
-  PRINT("\"Double quotation mark\"\n");         // \" Double quotation mark
-  PRINT("Question mark\?\n");  // Question mark
-  
-  LOCATE(0,22);
-  PRINT(presskey);
-  INKEY();
-}*/
-
 
 
 

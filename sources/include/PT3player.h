@@ -110,6 +110,10 @@ mvac7 version:
 //endstruc
 
 
+#define Loop_OFF 0
+#define Loop_ON  1
+
+
 /*
 T1_ = VT_+16 ;Tone tables data depacked here
 T_OLD_1 = T1_
@@ -145,6 +149,16 @@ extern unsigned int EnvBase;
 extern char VAR0END[240];
 
 
+/*            
+Switches: 1=ON; 0=OFF
+- BIT 0 = ?
+- BIT 1 = PLAYER ON/OFF
+- BIT 2 = ?
+- BIT 3 = ?
+- BIT 4 = LOOP ON/OFF
+- BIT 7 = set each time, when loop point is passed 
+*/
+extern char PT3state; //before called PT3_SETUP
 
 /* --- Workarea --- (apunta a RAM que estaba antes en codigo automodificable)
  -El byte de estado en SETUP deberia ser algo asi (CH enable/disable no esta aun)
@@ -154,9 +168,9 @@ LP: Loop enable/disable. A 1 si queremos que el tema suene solo una vez.
 EP: End point. A 1 cada vez que el tema acaba. 
 CH1-CH3: Channel enable/disable. A 1 si no queremos que suene el canal. (AUN  NO VA!!)
 */
+//extern char PT3_SETUP;   set bit0 to 1, if you want to play without looping
+//				           bit7 is set each time, when loop point is passed          
 
-extern char PT3_SETUP; /* set bit0 to 1, if you want to play without looping
-				           bit7 is set each time, when loop point is passed           */
 extern unsigned int PT3_MODADDR;	 //direccion datos canción
 extern unsigned int PT3_CrPsPtr;  //POSICION CURSOR EN PATTERN
 extern unsigned int PT3_SAMPTRS;  //sample info?
@@ -187,16 +201,53 @@ extern unsigned int NoteTable;   //note table memory address
 
 
 
+/* =============================================================================
+ PT3_Mute
+ Description: Silence the PSG
+ Input:       -
+ Output:      -
+============================================================================= */
+void PT3_Mute();
 
+
+
+/* =============================================================================
+ PT3_Loop
+ Description: Change state of loop
+ Input:       - 0=off ; 1=on  (false = 0, true = 1)
+ Output:      -
+============================================================================= */
+void PT3_Loop(char loop); 
+
+
+
+/* =============================================================================
+ PT3_Pause
+ Description: Pause song playback
+ Input:       -
+ Output:      -
+============================================================================= */
+void PT3_Pause();
+
+
+
+/* =============================================================================
+ PT3_Resume
+ Description: Resume song playback
+ Input:       -
+ Output:      -
+============================================================================= */  	
+void PT3_Resume();
 
 
 
 /* -----------------------------------------------------------------------------
-PT3Init
+PT3_InitSong
 (unsigned int) Song data address. Subtract 100 if you delete the header of the PT3 file.
 (char) Loop - 0=off ; 1=on  (false = 0, true = 1));
 ----------------------------------------------------------------------------- */
-void PT3Init(unsigned int,char);
+void PT3_InitSong(unsigned int songADDR, char loop);
+
 
 
 /* -----------------------------------------------------------------------------
@@ -205,40 +256,23 @@ Play Song.
 Send data to AY registers
 Execute on each interruption of VBLANK
 ----------------------------------------------------------------------------- */
-void PT3PlayAY();
+void PT3_PlayAY();
+
 
 
 /* -----------------------------------------------------------------------------
 PT3Decode
 Decode a frame from PT3 song
 ----------------------------------------------------------------------------- */
-void PT3Decode(); 
+void PT3_Decode(); 
 
 
-/* -----------------------------------------------------------------------------
-PT3Mute
-Silence the PSG.
------------------------------------------------------------------------------ */
-void PT3Mute();
-
-
-//void PT3Loop(char);  //0=off ; 1=on  (false = 0, true = 1)
-
-//void RESUME();
-//void LOAD_SONG(char numpatt);
-//void NEXT_PATTERN(char numpatt);
-//void MUTE(void);
 
 
 // mute functions, 0=off, other=on
 //void muteChannelA(char value);
 //void muteChannelB(char value);
 //void muteChannelC(char value);
-
-
-
-
-
 
 
 #endif

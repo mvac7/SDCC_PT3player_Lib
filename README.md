@@ -25,7 +25,8 @@ http://www.z80st.es/blog/2008/11/19a-nueva-version-del-replayer-de-pt3
 
 
 ## History of versions:
-- 1.2 (04/01/2021)>assignment of frequency table memory address to NoteTable (#2)
+- 1.3 (05/01/2021)>PT3state, PT3_Loop, PT3_Pause and PT3_Resume
+- 1.2 (04/01/2021) Assignment of frequency table memory address to NoteTable (#2)
 - 1.1 (28/05/2019) Adaptation to SDCC of asMSX version by SapphiRe.
 - 1.0 (21/10/2016) Adaptation to SDCC of the ROM version by Kun.
 
@@ -90,10 +91,13 @@ I want to give a special thanks to all those who freely share their knowledge wi
 
 ## Functions
 
-* void **PT3Init**(unsigned int, char) Init Song: (unsigned int) Song data address ;(char) Loop - 0=off ; 1=on
-* void **PT3Decode**() Decode a frame from PT3 Song.
-* void **PT3PlayAY**() Play Song. Execute on each interruption of VBLANK.
-* void **PT3Mute**() Silence the PSG.
+* **PT3_InitSong**(unsigned int songADDR, char loop)Init Song: (unsigned int) Song data address ;(char) Loop - 0=off ; 1=on
+* **PT3_PlayAY**() Play Song. Execute on each interruption of VBLANK.
+* **PT3_Decode**() Decode a frame from PT3 Song.
+* **PT3_Mute**() Silence the PSG.
+* **PT3_Loop**(char loop) Change state of loop
+* **PT3_Pause**() Pause song playback
+* **PT3_Resume**() Resume song playback
 
 
 
@@ -114,7 +118,7 @@ Follow the next steps:
 ```
 #include "../include/PT3player.h"
 #include "../include/PT3player_NoteTable2.h"
-#include "../include/songdata.PT3.h"
+#include "../include/SongData.PT3.h"
 
 
 #define  HALT __asm halt __endasm   //Z80 instruction: wait for the next interrupt
@@ -123,14 +127,14 @@ void main(void)
 {
 
     NoteTable = (unsigned int) NT;
-    PT3Init((unsigned int) SONG00 ,0);
+    PT3_InitSong((unsigned int) SONG00, Loop_OFF);
     
     while(1)
     {
       HALT;
 
-      PT3PlayAY();      
-      PT3Decode();
+      PT3_PlayAY();      
+      PT3_Decode();
       
       //your code here --->
             
