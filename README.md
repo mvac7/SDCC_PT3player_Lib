@@ -89,13 +89,14 @@ I want to give a special thanks to all those who freely share their knowledge wi
 
 ## Functions
 
+* **PT3_Init**() Initialize the Player.
 * **PT3_InitSong**(unsigned int songADDR, char loop)Init Song: (unsigned int) Song data address ;(char) Loop - 0=off ; 1=on
 * **PT3_PlayAY**() Play Song. Execute on each interruption of VBLANK.
 * **PT3_Decode**() Process the next step in the song sequence.
 * **PT3_Mute**() Silence the PSG.
-* **PT3_Loop**(char loop) Change state of loop
-* **PT3_Pause**() Pause song playback
-* **PT3_Resume**() Resume song playback
+* **PT3_Loop**(char loop) Change state of loop.
+* **PT3_Pause**() Pause song playback.
+* **PT3_Resume**() Resume song playback.
 
 
 

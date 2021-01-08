@@ -203,7 +203,7 @@ extern unsigned int NoteTable;   //note table memory address
 
 /* =============================================================================
  PT3_Init
- Description: Init player
+ Description: Initialize the Player
  Input:       -
  Output:      -
 ============================================================================= */
