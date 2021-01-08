@@ -1,6 +1,6 @@
 /* =============================================================================
   Test PT3 player Library for SDCC
-  Version: 1.2 (05/01/2021)
+  Version: 1.4 (07/01/2021)
   Author: (test program) mvac7 <mvac7303b@gmail.com>
   Architecture: MSX
   Format: ROM 8K
@@ -10,6 +10,7 @@
 
     
   History of versions:
+    - 1.3 (06/01/2021) Test PT3_Loop
     - 1.2 (05/01/2021) Updates related to v1.3 of the PT3player Lib
     - 1.1 (04/01/2021) assigning the frequency table to NoteTable
     - 1.0 (28/5/2019)
@@ -19,13 +20,15 @@
 #include "../include/msxSystemVariables.h"
 #include "../include/msxBIOS.h"
 
+#include "../include/memory.h"
 #include "../include/keyboard.h"
 #include "../include/textmode.h"
 #include "../include/interrupt.h"
 
 #include "../include/PT3player.h"
 #include "../include/PT3player_NoteTable2.h"
-#include "../include/A_funny_day_with_my_MSX.PT3.h"  //datas con el .PT3
+
+#include "../include/A_funny_day_with_my_MSX.PT3.h"  //song-data .PT3
 
 
 
@@ -49,11 +52,6 @@
 // Function Declarations -------------------------------------------------------
 void SetSpritesSize(char size);
 
-char PEEK(uint address);
-void POKE(uint address, char value);
-
-//void CopyMEM(unsigned int source, unsigned int destination, unsigned int length);
-
 char VPEEK(uint address);
 
 void WAIT(uint cicles);
@@ -63,13 +61,18 @@ void ShowVumeter(char channel, char value);
 
 void SetSPRITES();
 
-void PT3Stop();
+void Pause();
+
+void PlaySong(char songNumber);
+
+void SwapLoop();
+void ShowLoop();
 
 
 
 // constants  ------------------------------------------------------------------
-const char text01[] = "Test PT3player v1.3 Lib";
-const char text02[] = "v1.2 (05/01/2021)";
+const char text01[] = "Test PT3player v1.2 Lib";
+const char text02[] = "v1.4 (07/01/2021)";
 
 const char presskey[] = "Press a key to Play";
 
@@ -84,6 +87,8 @@ char SPRBUFFER[72];  //20*4 =72B
 boolean Row7pressed;
 
 uint firstPATaddr;
+
+char _loop;
 
 
 // Functions -------------------------------------------------------------------
@@ -132,36 +137,22 @@ void main(void)
   PRINT(text01);
   PRINT("\n");
   PRINT(text02);
-    
-  PRINT("\n\n");
   
-  PRINT("Song name:\n ");
-  PRINT(Song_name);
-  
-  PRINT("\n\n");
-  
-  PRINT("Author:\n ");
-  PRINT(Song_author);
-  
-  //PRINT("\n\n");
-  
-  LOCATE(0,10);
-  PRINT(presskey);
-  
-  //CopyMEM((unsigned int) NT,(unsigned int) NoteTable,96*2);   //Copy Note Table to the space reserved
+  // Initialize the Player
   NoteTable = (unsigned int) NT;
-     
-  //PT3Init((unsigned int) SONG00 - 100,0); // Subtract 100 if you delete the header of the PT3 file.    
-  PT3_InitSong((unsigned int) SONG00, Loop_OFF);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on 
+  PT3_Init();
+  //
   
-  firstPATaddr = PT3_CrPsPtr;
+    
+  _loop = Loop_OFF;
   
-  INKEY();
-  
-  LOCATE(0,10);
-  PRINT("STOP for Pause the song playback");
-  LOCATE(0,11);
-  PRINT("RETURN for Resume song playback"); 
+            
+  LOCATE(0,3);
+  //PRINT("F1 or F2 for play a song\n");
+  //PRINT("1 to 7 for play a FX\n"); 
+  PRINT("RETURN Play the song\n");
+  PRINT("STOP   Pause/Resume playback\n");
+  PRINT("TAB    Change Loop mode\n"); 
   
   SetSPRITES();
   
@@ -170,16 +161,21 @@ void main(void)
   while(1)
   {
     HALT;
+      
     
-    songStep=PT3_CrPsPtr - firstPATaddr;
-    LOCATE(0,13);    
-    PRINT("Step: ");
-    PrintNumber(songStep);
-        
+    if ((PT3state & Bit1))
+    {
+        songStep=PT3_CrPsPtr - firstPATaddr;
+        LOCATE(7,13);
+        PrintFNumber(songStep,32,3);
+        //LOCATE(25,13);
+        //PrintFNumber(PEEKW(PT3_LPosPtr),32,5);
+    }
+
     ShowVumeter(0,AYREGS[AR_AmplA]);
     ShowVumeter(1,AYREGS[AR_AmplB]);
-    ShowVumeter(2,AYREGS[AR_AmplC]);
-    
+    ShowVumeter(2,AYREGS[AR_AmplC]);    
+
        
     
     // Keyboard row 7
@@ -191,16 +187,16 @@ void main(void)
         //if (!(keyPressed&Bit0)) {Row7pressed=true;}; // [F4]
         //if (!(keyPressed&Bit1)) {Row7pressed=true;}; // [F5]
         //if (!(keyPressed&Bit2)) {Row7pressed=true;}; // [ESC]
-        //if (!(keyPressed&Bit3)) {Row7pressed=true;}; // [TAB]
-        if (!(keyPressed&Bit4)) {Row7pressed=true;PT3_Pause();}; // [STOP]
+        if (!(keyPressed&Bit3)) {Row7pressed=true;SwapLoop();}; // [TAB]
+        if (!(keyPressed&Bit4)) {Row7pressed=true;Pause();}; // [STOP]
         //if (!(keyPressed&Bit5)) {Row7pressed=true;}; // [BS]
         //if (!(keyPressed&Bit6)) {Row7pressed=true;}; // [SELECT]
-        if (!(keyPressed&Bit7)) {Row7pressed=true;PT3_Resume();}; // [RETURN]
+        if (!(keyPressed&Bit7)) {Row7pressed=true;PlaySong(0);}; // [RETURN]
       }      
     }else Row7pressed=false;
     
     
-    PT3_Decode();
+    PT3_Decode();  //Process the next step in the song sequence
 
     
   }
@@ -215,6 +211,63 @@ void main(void)
 }
 
 
+
+void Pause()
+{
+    
+   if ((PT3state & Bit1)) PT3_Pause();
+   else PT3_Resume();
+   
+}
+
+
+void SwapLoop()
+{
+  _loop = !_loop;
+  
+  PT3_Loop(_loop);
+  ShowLoop();
+}
+
+
+
+void PlaySong(char songNumber)
+{ 
+  //PT3Init((unsigned int) SONG00 - 100,0); // Subtract 100 if you delete the header of the PT3 file.    
+  PT3_InitSong((unsigned int) SONG00, _loop);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on
+  
+  firstPATaddr = PT3_CrPsPtr;
+  
+  LOCATE(0,9);
+  
+  PRINT("Song  :");
+  PrintFNumber(songNumber+1,32,1);
+  
+  PRINT("\nName  :");
+  PRINT(Song_name);
+  
+  PRINT("\nAuthor:");
+  PRINT(Song_author);
+  
+  LOCATE(0,13);    
+  PRINT("Pos.  :");
+  
+  //PRINT("\nTempo : ");
+  //PrintFNumber(TEMPO,32,2);
+  
+  ShowLoop();
+}
+
+
+
+void ShowLoop()
+{   
+  //if (_loop==Loop_ON) PRINT("ON "); 
+    
+  LOCATE(0,12);
+  if ((PT3state & Bit4)) PRINT("Loop  :ON ");
+  else PRINT("Loop  :OFF");
+}
 
 
 /* =============================================================================
@@ -262,8 +315,8 @@ writeVDP:
   
   ld   A,B
   di
-	out	 (#VDPSTATUS),A
-	ld   A,C
+  out	 (#VDPSTATUS),A
+  ld   A,C
   or   #0x80            ;add 128 to VDP reg value
   out	 (#VDPSTATUS),A
   ei
@@ -271,84 +324,6 @@ writeVDP:
 
 __endasm;
 }
-
-
-
-
-
-
-char PEEK(uint address) __naked
-{
-address;
-__asm
-  push IX
-  ld   IX,#0
-  add  IX,SP
-    
-  ld   L,4(IX)
-  ld   H,5(IX)
-  ld   A,(HL)
-
-  ld   L,A
-  pop  IX
-  ret
-__endasm;
-}
-
-
-
-void POKE(uint address, char value) __naked
-{
-address;value;
-__asm
-  push IX
-  ld   IX,#0
-  add  IX,SP
-    
-  ld   L,4(IX)
-  ld   H,5(IX)
-  ld   A,6(IX)
-  ld   (HL),A
-
-  pop  IX
-  ret  
-__endasm;
-}
-
-
-
-/* =============================================================================
-   CopyMEM
- 
-   Function : Copy a block of memory to another address.
-   Input    : [unsigned int] Source memory address
-              [unsigned int] Destination RAM address
-              [unsigned int] length 
-   Output   : -
-============================================================================= */
-/*void CopyMEM(unsigned int source, unsigned int destination, unsigned int length) __naked
-{
-source;destination;length;
-__asm
-  push IX
-  ld   IX,#0
-  add  IX,SP
-  
-  ld   L,4(IX)
-  ld   H,5(IX) ;source memory address
-  
-  ld   E,6(IX)
-  ld   D,7(IX) ;Destination RAM address
-  
-  ld   C,8(IX)
-  ld   B,9(IX) ;length
-  
-  ldir
-  
-  pop  IX
-  ret
-__endasm;
-}*/
 
 
 

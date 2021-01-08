@@ -202,6 +202,16 @@ extern unsigned int NoteTable;   //note table memory address
 
 
 /* =============================================================================
+ PT3_Init
+ Description: Init player
+ Input:       -
+ Output:      -
+============================================================================= */
+void PT3_Init();
+
+
+
+/* =============================================================================
  PT3_Mute
  Description: Silence the PSG
  Input:       -

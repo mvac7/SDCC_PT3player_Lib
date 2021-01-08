@@ -1,7 +1,7 @@
 /* =============================================================================
    SDCC Vortex Tracker II PT3 player for MSX
 
-   Version: 1.3 (05/01/2021)
+   Version: 1.1.4 (08/01/2021)
    Architecture: MSX
    Format: C Object (SDCC .rel)
    Programming language: C and Z80 assembler
@@ -21,8 +21,9 @@
      software development in C (SDCC). 
      
    History of versions:
-    - 1.3 (05/01/2021)>PT3state, PT3_Loop, PT3_Pause and PT3_Resume
-    - 1.2 (04/01/2021) assignment of frequency table memory address to NoteTable 
+    - 1.1.4 (08/01/2021)>PT3_Init and Bug #11 in loop
+    - 1.1.3 (05/01/2021) PT3state, PT3_Loop, PT3_Pause and PT3_Resume
+    - 1.1.2 (04/01/2021) assignment of frequency table memory address to NoteTable 
     - 1.1 (28/05/2019) Adaptation to SDCC of asMSX version by SapphiRe.
     - 1.0 (21/10/2016) Adaptation to SDCC of the ROM version by Kun.
 
@@ -103,7 +104,7 @@ CH1-CH3: Channel enable/disable. A 1 si no queremos que suene el canal. (AUN  NO
 //char PT3_SETUP;  set bit0 to 1, if you want to play without looping
 //				       bit7 is set each time, when loop point is passed
            
-unsigned int PT3_MODADDR;	 //direccion datos canción
+unsigned int PT3_MODADDR;  //direccion datos canción
 unsigned int PT3_CrPsPtr;  //POSICION CURSOR EN PATTERN
 unsigned int PT3_SAMPTRS;  //sample info?
 unsigned int PT3_OrnPtrs;  //Ornament pattern
@@ -141,6 +142,67 @@ unsigned int NoteTable;   //note table memory address
 
 
 /* =============================================================================
+ PT3_Init
+ Description: Init player
+ Input:       -
+ Output:      -
+============================================================================= */
+void PT3_Init() __naked
+{
+__asm
+
+; Create Volume Table for Vortex Tracker II/PT3.5
+; (c) Ivan Roshin, adapted by SapphiRe ---
+  ld   HL,#0x11
+  ld   D,H
+  ld   E,H
+  ld   IX,#_VAR0END  ;_VT_+16
+  ld   B,#15
+INITV1:	
+  push HL
+  add  HL,DE
+  ex   DE,HL
+  sbc  HL,HL
+  ld   C,B 
+  ld   B,#16
+INITV2:	
+  ld   A,L
+  rla
+  ld   A,H
+  adc  A,#0
+  ld   (IX),A
+  inc  IX
+  add  HL,DE
+  djnz INITV2
+  pop  HL
+  ld   A,E
+  cp   #0x77
+  jr   NZ,INITV3
+  inc  E
+INITV3:	
+  ld   B,C
+  djnz INITV1
+
+
+CLEAR_REGS: 
+  xor  A  
+  ld   (#_PT3state),A
+  
+  LD   HL,#_AYREGS
+  LD   DE,#_AYREGS+1
+  LD   BC,#14
+  LD   (HL),A
+  LDIR  
+  
+  ret
+__endasm;
+}
+
+
+
+
+
+/* =============================================================================
  PT3_Mute
  Description: Silence the PSG
  Input:       -
@@ -169,14 +231,14 @@ __endasm;
  Input:       -
  Output:      -
 ============================================================================= */
-void PT3_Pause()
+void PT3_Pause() __naked
 {
 __asm
    LD   HL,#_PT3state       
    RES  1,(HL)
+   
+   jp   MUTE
 __endasm;
-
-    PT3_Mute();
 }
 // ----------------------------------------------------------------------------- <<< END PT3_Pause
 
@@ -213,7 +275,9 @@ void PT3_Loop(char loop) __naked
 loop;
 __asm 
   push IX
-  
+  ld   IX,#0
+  add  IX,SP
+    
   ld   HL,#_PT3state
   
   ld   A,4(IX)
@@ -251,9 +315,9 @@ __asm
   ld   IX,#0
   add  IX,SP
   
-  ld   HL,#_PT3state
+  call CLEAR_REGS
   
-  ld   (HL),#0
+  ld   HL,#_PT3state
   SET  1,(HL)      ;PLAYER ON  
   
   ld   A,6(IX)
@@ -286,10 +350,10 @@ playerINIT::
   LD   (#_PT3_Delay),A
   
   PUSH HL
-  POP  IX                 ;<<-- IX = _PT3_MODADDR + 100
+  POP  IX                 ;<<-- IX = PT3_MODADDR + 100
   
   ADD  HL,DE
-  LD   (#_PT3_CrPsPtr),HL  ;+200 = Cr Ps Ptr data
+  LD   (#_PT3_CrPsPtr),HL  ;PT3_MODADDR + 200 = Cr Ps Ptr data
   
   LD   E,2(IX)
   ADD  HL,DE
@@ -311,47 +375,12 @@ playerINIT::
   ADD  HL,DE
   LD   (#_PT3_SAMPTRS),HL
   
-  LD   HL,#_PT3state
-  RES  7,(HL)
-
-
-; Create Volume Table for Vortex Tracker II/PT3.5
-; (c) Ivan Roshin, adapted by SapphiRe ---
-  ld	HL,#0x11
-  ld	D,H
-  ld  E,H
-  ld  IX,#_VAR0END  ;_VT_+16
-  ld  B,#15
-INITV1:	
-  push HL
-  add  HL,DE
-  ex   DE,HL
-  sbc  HL,HL
-  ld   C,B 
-  ld   B,#16
-INITV2:	
-  ld   A,L
-  rla
-  ld   A,H
-  adc  A,#0
-  ld   (IX),A
-  inc  IX
-  add  HL,DE
-  djnz INITV2
-  pop  HL
-  ld   A,E
-  cp   #0x77
-  jr   NZ,INITV3
-  inc  E
-INITV3:	
-  ld   B,C
-  djnz INITV1
-    
-
-  
+  ;LD   HL,#_PT3state
+  ;RES  7,(HL)
+ 
   
 ; --- INITIALIZE PT3 VARIABLES ---
-  xor	 A	
+  xor  A	
   LD   HL,#_ChanA     ;VARS
   LD   (HL),A
   LD   DE,#_ChanA+1   ;VARS+1
@@ -455,16 +484,20 @@ __asm
   LD   (#_AYREGS+AR_Mixer),A
   DEC  A
   LD   (#_AYREGS+AR_EnvTp),A
+  
   LD   HL,#_DelyCnt
   DEC  (HL)
-  JP   NZ,PL2 
+  JP   NZ,PL2
+   
   LD   HL,#_ChanA+CHNPRM_NtSkCn
   DEC  (HL)
   JR   NZ,PL1B
+  
   ld	 BC,(#_PT3_AdInPtA)
   LD   A,(BC)
   AND  A
   JR   NZ,PL1A
+  
   LD   D,A
   LD   (#_Ns_Base),A
   LD   HL,(#_PT3_CrPsPtr)
@@ -472,10 +505,13 @@ __asm
   LD   A,(HL)
   INC  A
   JR   NZ,PLNLP
+  
   CALL CHECKLP
-  ld	 HL,(#_PT3_LPosPtr)
+    
+  ld   HL,(#_PT3_LPosPtr)
   LD   A,(HL)
   INC  A
+  
 PLNLP:	
   LD   (#_PT3_CrPsPtr),HL
   DEC  A
@@ -572,22 +608,33 @@ PL2:
   LD   HL,(#_PT3_ESldAdd)
   ADD  HL,DE
   LD   (#_CurESld),HL
+  
+  
+;  LD   HL,#_PT3state
+;  BIT  1,(HL)   ; pause mode
+;  JP   Z,MUTE
+  
   RET
 
 
-
+;Check Loop
 CHECKLP:	
   LD   HL,#_PT3state
-  SET  7,(HL)   ;loop control
+  ;SET  7,(HL)   ;loop control
   BIT  4,(HL)   ;loop bit 
   RET  NZ
   
-;=1 - No loop
+;=0 - No loop
+
+;remove the lock if finished the song. Bug #11
+  RES  1,(HL) ;set pause mode
+  
   POP  HL
   LD   HL,#_DelyCnt
   INC  (HL)
-  LD   HL,#_ChanA+CHNPRM_NtSkCn
-  INC  (HL)
+;  LD   HL,#_ChanA+CHNPRM_NtSkCn
+;  INC  (HL)
+    
   JP   MUTE
 
 

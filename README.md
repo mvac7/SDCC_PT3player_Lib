@@ -17,16 +17,14 @@ In Test/Example software:
 - "A funny day with my MSX" PT3 song by Makinavaja 
 ```
 
-#### asMSX PT3 player (by SapphiRe):        
-http://www.z80st.es/blog/2008/11/19a-nueva-version-del-replayer-de-pt3        
+#### PT3 player for asMSX cross-assembler (by SapphiRe): [Nueva version del replayer de PT3](http://www.z80st.es/blog/2008/11/19a-nueva-version-del-replayer-de-pt3)        
 
 
 ## Sorry!: This text is pending correction of the English translation. <<<<<<<<
 
 
 ## History of versions:
-- 1.3 (05/01/2021)>PT3state, PT3_Loop, PT3_Pause and PT3_Resume
-- 1.2 (04/01/2021) Assignment of frequency table memory address to NoteTable (#2)
+- 1.2 (??/01/2021)>Assignment of frequency table memory address to NoteTable, PT3state, PT3_Loop, PT3_Pause and PT3_Resume.
 - 1.1 (28/05/2019) Adaptation to SDCC of asMSX version by SapphiRe.
 - 1.0 (21/10/2016) Adaptation to SDCC of the ROM version by Kun.
 
@@ -37,8 +35,8 @@ Adaptation of the latest version of Vortex Tracker II PT3 Player for MSX (Sapphi
 
 Allows access to player variables.
 
-As there are four tables of notes available in Vortex Tracker, this must be assigned externally, copying to the space reserved in the variable NoteTable.
-The four tables are included in files <PT3player_NoteTableN.h>  
+Allows you to use any of the four note/frequency tables available in Vortex Tracker. 
+They are available in header format to be included in your program.  
 
 In the source code (\examples), you can find applications for testing and learning purposes.
 
@@ -93,7 +91,7 @@ I want to give a special thanks to all those who freely share their knowledge wi
 
 * **PT3_InitSong**(unsigned int songADDR, char loop)Init Song: (unsigned int) Song data address ;(char) Loop - 0=off ; 1=on
 * **PT3_PlayAY**() Play Song. Execute on each interruption of VBLANK.
-* **PT3_Decode**() Decode a frame from PT3 Song.
+* **PT3_Decode**() Process the next step in the song sequence.
 * **PT3_Mute**() Silence the PSG.
 * **PT3_Loop**(char loop) Change state of loop
 * **PT3_Pause**() Pause song playback
@@ -105,11 +103,11 @@ I want to give a special thanks to all those who freely share their knowledge wi
 
 Follow the next steps:
 
-1) Assign the table of notes that corresponds to the one used in the song. 
-2) Initialize the song to sound with **PT3Init**.
-3) At each VBLANK interrupt, execute **PT3PlayAY**. This function dumps the AY record values and makes it sound.
-4) Execute **PT3Decode** in your code in each frame, to process the song data.
-5) As you want to stop the playback of the song, execute **PT3Mute** and stop calling **PT3Decode**.
+1) Initialize the player by executing **PT3_Init()** and assign the frequency table (__NoteTable = (unsigned int) NT;__). 
+2) Initialize the song to play with **PT3_InitSong**.
+3) At each VBLANK interrupt, execute **PT3_PlayAY()**. This function dumps the AY record values and makes it sound.
+4) Execute **PT3_Decode()** in your code in each frame, to process the song data.
+5) You can stop song playback by executing **PT3_Pause()** and resume with **PT3_Resume()**.
 6) To play another song, repeat these steps starting with number 2.
 
 
@@ -127,6 +125,8 @@ void main(void)
 {
 
     NoteTable = (unsigned int) NT;
+    PT3_Init();
+    
     PT3_InitSong((unsigned int) SONG00, Loop_OFF);
     
     while(1)
