@@ -244,10 +244,10 @@ void PlaySong(char songNumber)
   PrintFNumber(songNumber+1,32,1);
   
   PRINT("\nName  :");
-  PRINT(Song_name);
+  PRINT(SONG00_name);
   
   PRINT("\nAuthor:");
-  PRINT(Song_author);
+  PRINT(SONG00_author);
   
   LOCATE(0,13);    
   PRINT("Pos.  :");

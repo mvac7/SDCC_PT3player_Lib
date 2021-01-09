@@ -190,7 +190,7 @@ CLEAR_REGS:
   
   LD   HL,#_AYREGS
   LD   DE,#_AYREGS+1
-  LD   BC,#14
+  LD   BC,#13
   LD   (HL),A
   LDIR  
   
@@ -314,10 +314,10 @@ __asm
   push IX
   ld   IX,#0
   add  IX,SP
-  
-  call CLEAR_REGS
-  
+
+  xor  A
   ld   HL,#_PT3state
+  ld   (HL),A
   SET  1,(HL)      ;PLAYER ON  
   
   ld   A,6(IX)
@@ -377,16 +377,16 @@ playerINIT::
   
   ;LD   HL,#_PT3state
   ;RES  7,(HL)
- 
   
-; --- INITIALIZE PT3 VARIABLES ---
+  
+; --- INITIALIZE PT3 VARIABLES -------------------------------------------------  
   xor  A	
   LD   HL,#_ChanA     ;VARS
   LD   (HL),A
   LD   DE,#_ChanA+1   ;VARS+1
-  LD   BC,#_VAR0END - _ChanA -1  ;VARS -1
+  LD   BC,#_VAR0END - _ChanA -1    ;_AYREGS - _ChanA -1
   LDIR
-  
+    
   INC  A
   LD   (#_DelyCnt),A
   LD   HL,#0xF001	;H - CHNPRM_Volume, L - CHNPRM_NtSkCn

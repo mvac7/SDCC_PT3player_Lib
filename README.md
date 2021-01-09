@@ -5,7 +5,6 @@ Architecture: MSX
 Format: C Object (SDCC .rel)
 Programming language: C and Z80 assembler
 
-
 Authors: 
 - Vortex Tracker II v1.0 PT3 player for ZX Spectrum by S.V.Bulba <vorobey@mail.khstu.ru> http://bulba.at.kz
 - Adapted to MSX by Alfonso D. C. aka Dioniso <dioniso072@yahoo.es>
@@ -17,7 +16,7 @@ In Test/Example software:
 - "A funny day with my MSX" PT3 song by Makinavaja 
 ```
 
-#### PT3 player for asMSX cross-assembler (by SapphiRe): [Nueva version del replayer de PT3](http://www.z80st.es/blog/2008/11/19a-nueva-version-del-replayer-de-pt3)        
+#### PT3 player (Fixed Table) for asMSX cross-assembler (by SapphiRe): [Nueva version del replayer de PT3](http://www.z80st.es/blog/2008/11/19a-nueva-version-del-replayer-de-pt3)        
 
 
 ## Sorry!: This text is pending correction of the English translation. <<<<<<<<
@@ -90,11 +89,11 @@ I want to give a special thanks to all those who freely share their knowledge wi
 ## Functions
 
 * **PT3_Init**() Initialize the Player.
-* **PT3_InitSong**(unsigned int songADDR, char loop)Init Song: (unsigned int) Song data address ;(char) Loop - 0=off ; 1=on
+* **PT3_InitSong**(unsigned int songADDR, char loop) Initialize song (songADDR -> Song data address ; loop -> 0=off ; 1=on)
 * **PT3_PlayAY**() Play Song. Execute on each interruption of VBLANK.
 * **PT3_Decode**() Process the next step in the song sequence.
 * **PT3_Mute**() Silence the PSG.
-* **PT3_Loop**(char loop) Change state of loop.
+* **PT3_Loop**(char loop) Change state of loop. (loop -> 0=off ; 1=on)
 * **PT3_Pause**() Pause song playback.
 * **PT3_Resume**() Resume song playback.
 
@@ -104,12 +103,50 @@ I want to give a special thanks to all those who freely share their knowledge wi
 
 Follow the next steps:
 
-1) Initialize the player by executing **PT3_Init()** and assign the frequency table (__NoteTable = (unsigned int) NT;__). 
-2) Initialize the song to play with **PT3_InitSong**.
-3) At each VBLANK interrupt, execute **PT3_PlayAY()**. This function dumps the AY record values and makes it sound.
-4) Execute **PT3_Decode()** in your code in each frame, to process the song data.
-5) You can stop song playback by executing **PT3_Pause()** and resume with **PT3_Resume()**.
-6) To play another song, repeat these steps starting with number 2.
+1) Create a song in PT3 format with the Vortex Tracker.
+2) Dump the file into C code, in a constant array of char and save it as a header (.h).
+3) Include the header with the song data in your main source. 
+4) Initialize the player by executing **PT3_Init()** and assign the frequency table (__NoteTable = (unsigned int) NT;__). 
+5) Initialize the song to play with **PT3_InitSong**.
+6) At each VBLANK interrupt, execute **PT3_PlayAY()**. This function dumps the AY record values and makes it sound.
+7) Execute **PT3_Decode()** in your code in each frame, to process the song data.
+8) You can stop song playback by executing **PT3_Pause()** and resume with **PT3_Resume()**.
+9) To play another song, repeat these steps starting with number 5.
+
+
+### How to convert PT3 binary file to C data
+
+To pass a binary to C data you will need a utility that does this task.
+
+In the current version of the player, it is designed so that the data block includes the 100 Byte header that contains the PT3s (Note: In a future version it will be removed).
+
+You can add the name of the song and the author if you need them to view them in an application like Jukebox/Music-Disk.
+
+If you are going to use several songs in your program, you will need to differentiate the names of the constants, so that you do not get an error when compiling. 
+You can use the "SONG00" tag and number each song (Look at the example).
+
+
+```
+// Vortex Tracker II 1.0 module
+
+const char SONG00_name[] = "A funny day with my MSX";
+const char SONG00_author[] = "Makinavaja";
+
+
+// maki_ru50inv.pt3
+// BinaryFile
+// Length=2985
+const char SONG00[]={
+0x56,0x6F,0x72,0x74,0x65,0x78,0x20,0x54,0x72,0x61,0x63,0x6B,0x65,0x72,0x20,0x49,
+0x49,0x20,0x31,0x2E,0x30,0x20,0x6D,0x6F,0x64,0x75,0x6C,0x65,0x3A,0x20,0x41,0x20,
+0x66,0x75,0x6E,0x6E,0x79,0x20,0x64,0x61,0x79,0x20,0x77,0x69,0x74,0x68,0x20,0x6D,
+0x79,0x20,0x4D,0x53,0x58,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x62,
+0x79,0x20,0x4D,0x61,0x6B,0x69,0x6E,0x61,0x76,0x61,0x6A,0x61,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x02,0x03,0x25,0x00,0xEF,0x00,0x00,0x00,0xBD,0x0A,0xCB,0x0A,0xD1,
+0x0A,0xD7,0x0A,0x99,0x0B,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+...};
+```
 
 
 ### Example code

@@ -1,8 +1,7 @@
-
 // Vortex Tracker II 1.0 module
 
-const char Song_name[] = "A funny day with my MSX";
-const char Song_author[] = "Makinavaja";
+const char SONG00_name[] = "A funny day with my MSX";
+const char SONG00_author[] = "Makinavaja";
 
 
 // ru50inv.pt3
