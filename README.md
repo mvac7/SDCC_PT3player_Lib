@@ -114,6 +114,40 @@ Follow the next steps:
 9) To play another song, repeat these steps starting with number 5.
 
 
+### Example code
+
+```
+#include "../include/PT3player.h"
+#include "../include/PT3player_NoteTable2.h"
+#include "../include/SongData.PT3.h"
+
+
+#define  HALT __asm halt __endasm   //Z80 instruction: wait for the next interrupt
+
+void main(void)
+{
+
+    NoteTable = (unsigned int) NT;
+    PT3_Init();
+    
+    PT3_InitSong((unsigned int) SONG00, Loop_OFF);
+    
+    while(1)
+    {
+      HALT;
+
+      PT3_PlayAY();      
+      PT3_Decode();
+      
+      //your code here --->
+            
+    }
+    
+}
+```
+
+
+
 ### How to convert PT3 binary file to C data
 
 To pass a binary to C data you will need a utility that does this task.
@@ -146,37 +180,4 @@ const char SONG00[]={
 0x20,0x20,0x20,0x02,0x03,0x25,0x00,0xEF,0x00,0x00,0x00,0xBD,0x0A,0xCB,0x0A,0xD1,
 0x0A,0xD7,0x0A,0x99,0x0B,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 ...};
-```
-
-
-### Example code
-
-```
-#include "../include/PT3player.h"
-#include "../include/PT3player_NoteTable2.h"
-#include "../include/SongData.PT3.h"
-
-
-#define  HALT __asm halt __endasm   //Z80 instruction: wait for the next interrupt
-
-void main(void)
-{
-
-    NoteTable = (unsigned int) NT;
-    PT3_Init();
-    
-    PT3_InitSong((unsigned int) SONG00, Loop_OFF);
-    
-    while(1)
-    {
-      HALT;
-
-      PT3_PlayAY();      
-      PT3_Decode();
-      
-      //your code here --->
-            
-    }
-    
-}
 ```
