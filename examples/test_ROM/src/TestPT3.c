@@ -1,15 +1,17 @@
 /* =============================================================================
   Test PT3 player Library for SDCC
-  Version: 1.4 (07/01/2021)
+  Version: 1.5 (28/01/2021)
   Author: (test program) mvac7 <mvac7303b@gmail.com>
   Architecture: MSX
-  Format: ROM 8K
+  Format: ROM 16K
   Programming language: C and Z80 assembler
    
   Description:
 
     
   History of versions:
+    - 1.5 (28/01/2021) support for multiple songs
+    - 1.4 (07/01/2021)
     - 1.3 (06/01/2021) Test PT3_Loop
     - 1.2 (05/01/2021) Updates related to v1.3 of the PT3player Lib
     - 1.1 (04/01/2021) assigning the frequency table to NoteTable
@@ -28,8 +30,9 @@
 #include "../include/PT3player.h"
 #include "../include/PT3player_NoteTable2.h"
 
-#include "../include/A_funny_day_with_my_MSX.PT3.h"  //song-data .PT3
-
+//song-data .PT3
+#include "../include/maki_ru50inv_PT3.h"
+#include "../include/maki_CompoAY19v2_PT3.h"
 
 
 #define  HALT __asm halt __endasm   //Z80 instruction: wait for the next interrupt
@@ -69,10 +72,13 @@ void SwapLoop();
 void ShowLoop();
 
 
+void PrintF(char* text, char length);
+
+
 
 // constants  ------------------------------------------------------------------
 const char text01[] = "Test PT3player v1.2 Lib";
-const char text02[] = "v1.4 (07/01/2021)";
+const char text02[] = "v1.5 (28/01/2021)";
 
 const char presskey[] = "Press a key to Play";
 
@@ -84,9 +90,15 @@ char VALUE;
 
 char SPRBUFFER[72];  //20*4 =72B
 
+
+boolean Row6pressed;
 boolean Row7pressed;
 
 uint firstPATaddr;
+
+uint songNames[2];
+uint songAuthors[2];
+uint songPT3Data[2];
 
 char _loop;
 
@@ -94,10 +106,13 @@ char _loop;
 // Functions -------------------------------------------------------------------
 
 
+// Routine for Hook TIMI (FD9Fh)
 void my_isr0(void) __interrupt 
 {
-	DI;
-	READ_VDP_STATUS;
+	//DI;
+	//READ_VDP_STATUS;     <<---- It is not necessary as the ISR in the BIOS does.
+
+__asm push  AF __endasm;
   
     PT3_PlayAY();
 
@@ -108,11 +123,11 @@ __asm
   ld   BC,#20*4
   call 0x005C  
 __endasm;
-      
-  EI;
+
+__asm pop   AF __endasm;       
+
+  //EI;
 }
-
-
 
 
 
@@ -125,8 +140,17 @@ void main(void)
   uint conta = 0;
   uint songStep;
   
+  Row6pressed=false;
   Row7pressed=false;
   
+  songNames[0] = (unsigned int) SONG00_name;
+  songNames[1] = (unsigned int) SONG01_name;
+  songAuthors[0] = (unsigned int) SONG00_author;
+  songAuthors[1] = (unsigned int) SONG01_author;  
+  songPT3Data[0] = (unsigned int) SONG00;
+  songPT3Data[1] = (unsigned int) SONG01;
+  
+   
   COLOR(WHITE,DARK_BLUE,LIGHT_BLUE);
           
   WIDTH(32);
@@ -148,9 +172,9 @@ void main(void)
   
             
   LOCATE(0,3);
-  //PRINT("F1 or F2 for play a song\n");
+  PRINT("F1 or F2 for play a song\n");
   //PRINT("1 to 7 for play a FX\n"); 
-  PRINT("RETURN Play the song\n");
+  //PRINT("RETURN Play the song\n");
   PRINT("STOP   Pause/Resume playback\n");
   PRINT("TAB    Change Loop mode\n"); 
   
@@ -176,7 +200,21 @@ void main(void)
     ShowVumeter(1,AYREGS[AR_AmplB]);
     ShowVumeter(2,AYREGS[AR_AmplC]);    
 
-       
+    
+    // Keyboard row 6
+    keyPressed = GetKeyMatrix(6);  
+    if (keyPressed!=0xFF)  //pressure control of the keys
+    {
+      if(Row6pressed==false)
+      {
+        if (!(keyPressed & Bit5)){Row6pressed=true;PlaySong(0);} //F1 Key
+        if (!(keyPressed & Bit6)){Row6pressed=true;PlaySong(1);} //F2 Key
+        //if (!(keyPressed & Bit7)){keyB6pressStatus=true;PlaySong(3);} //F3 Key        
+      }      
+    }else{
+      Row6pressed=false;        
+    }   
+    
     
     // Keyboard row 7
     keyPressed = GetKeyMatrix(7);
@@ -191,7 +229,7 @@ void main(void)
         if (!(keyPressed&Bit4)) {Row7pressed=true;Pause();}; // [STOP]
         //if (!(keyPressed&Bit5)) {Row7pressed=true;}; // [BS]
         //if (!(keyPressed&Bit6)) {Row7pressed=true;}; // [SELECT]
-        if (!(keyPressed&Bit7)) {Row7pressed=true;PlaySong(0);}; // [RETURN]
+        //if (!(keyPressed&Bit7)) {Row7pressed=true;PlaySong(0);}; // [RETURN]
       }      
     }else Row7pressed=false;
     
@@ -234,28 +272,41 @@ void SwapLoop()
 void PlaySong(char songNumber)
 { 
   //PT3Init((unsigned int) SONG00 - 100,0); // Subtract 100 if you delete the header of the PT3 file.    
-  PT3_InitSong((unsigned int) SONG00, _loop);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on
+  PT3_InitSong(songPT3Data[songNumber], _loop);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on
   
   firstPATaddr = PT3_CrPsPtr;
   
-  LOCATE(0,9);
-  
-  PRINT("Song  :");
+  LOCATE(0,9);  
+  PRINT("Song  :   ");
+  LOCATE(7,9);
   PrintFNumber(songNumber+1,32,1);
   
-  PRINT("\nName  :");
-  PRINT(SONG00_name);
+  LOCATE(0,10);
+  PRINT("Name  :                         ");
+  LOCATE(7,10);
+  PrintF((char*) songNames[songNumber],25);
   
-  PRINT("\nAuthor:");
-  PRINT(SONG00_author);
+  LOCATE(0,11);
+  PRINT("Author:                         ");
+  LOCATE(7,11);
+  PrintF((char*) songAuthors[songNumber],25);
   
   LOCATE(0,13);    
-  PRINT("Pos.  :");
+  PRINT("Pos.  :    ");
   
   //PRINT("\nTempo : ");
   //PrintFNumber(TEMPO,32,2);
   
   ShowLoop();
+}
+
+
+
+void PrintF(char* text, char length)
+{
+  DI;  
+  while(*(text) && length-->0)  bchput(*(text++));
+  EI;  
 }
 
 

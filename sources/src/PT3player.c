@@ -1,7 +1,7 @@
 /* =============================================================================
    SDCC Vortex Tracker II PT3 player for MSX
 
-   Version: 1.1.4 (08/01/2021)
+   Version: 1.1.5 (22/01/2021)
    Architecture: MSX
    Format: C Object (SDCC .rel)
    Programming language: C and Z80 assembler
@@ -21,11 +21,12 @@
      software development in C (SDCC). 
      
    History of versions:
-    - 1.1.4 (08/01/2021)>PT3_Init and Bug #11 in loop
+    - 1.1.5 (22/01/2021)>Adjusted to work without the 100 Byte header
+    - 1.1.4 (08/01/2021) PT3_Init and Bug #11 in loop
     - 1.1.3 (05/01/2021) PT3state, PT3_Loop, PT3_Pause and PT3_Resume
     - 1.1.2 (04/01/2021) assignment of frequency table memory address to NoteTable 
-    - 1.1 (28/05/2019) Adaptation to SDCC of asMSX version by SapphiRe.
-    - 1.0 (21/10/2016) Adaptation to SDCC of the ROM version by Kun.
+    - 1.1   (28/05/2019) Adaptation to SDCC of asMSX version by SapphiRe.
+    - 1.0   (21/10/2016) Adaptation to SDCC of the ROM version by Kun.
 
 In this replayer:
 
@@ -340,31 +341,35 @@ initSong:
 
 ; HL - AddressOfModule
 playerINIT::
-  LD   (#_PT3_MODADDR),HL
-  PUSH HL
+  ld   DE,#100
+  sbc  HL,DE
   
-  LD   DE,#100
+  LD   (#_PT3_MODADDR),HL
+   
+  PUSH HL 
+  
+  ;LD   DE,#100
   ADD  HL,DE
   
-  LD   A,(HL)            ;+100 = 1B Delay
+  LD   A,(HL)            ;+1B Delay
   LD   (#_PT3_Delay),A
   
   PUSH HL
-  POP  IX                 ;<<-- IX = PT3_MODADDR + 100
+  POP  IX                 ;<<-- IX = HL = PT3_MODADDR (+ 100 Header)
   
-  ADD  HL,DE
-  LD   (#_PT3_CrPsPtr),HL  ;PT3_MODADDR + 200 = Cr Ps Ptr data
+  ADD  HL,DE              ;PT3_MODADDR + 200
+  LD   (#_PT3_CrPsPtr),HL ;Cr Ps Ptr data
   
   LD   E,2(IX)
   ADD  HL,DE
   INC  HL
-  LD   (#_PT3_LPosPtr),HL  ;  	
+  LD   (#_PT3_LPosPtr),HL  	
     
   POP  DE                 ;<<-- DE = _PT3_MODADDR
   
   LD   L,3(IX)
   LD   H,4(IX)
-  ADD  HL,DE      
+  ADD  HL,DE
   LD   (#_PT3_PatsPtr),HL
   
   LD   HL,#169
@@ -651,12 +656,12 @@ PD_SAM:
 PD_SAM_:	
   LD   E,A
   LD   D,#0
-  ld	 HL,(#_PT3_SAMPTRS)
+  ld   HL,(#_PT3_SAMPTRS)
   ADD  HL,DE
   LD   E,(HL)
   INC  HL
   LD   D,(HL)
-  ld	 HL,(#_PT3_MODADDR)
+  ld   HL,(#_PT3_MODADDR)
   ADD  HL,DE
   LD   -12+CHNPRM_SamPtr(IX),L
   LD   -12+CHNPRM_SamPtr+1(IX),H
@@ -924,7 +929,7 @@ SETORN:
   LD   E,A
   LD   D,#0
   LD   -12+CHNPRM_PsInOr(IX),D
-  ld	 HL,(#_PT3_OrnPtrs) 
+  ld   HL,(#_PT3_OrnPtrs) 
   ADD  HL,DE
   LD   E,(HL)
   INC  HL
