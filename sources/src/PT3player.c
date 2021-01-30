@@ -509,9 +509,9 @@ __asm
   INC  HL
   LD   A,(HL)
   INC  A
-  JR   NZ,PLNLP
+  JR   NZ,PLNLP    ;if not end of song jump to PLNLP
   
-  CALL CHECKLP
+  CALL CHECK_LOOP  ;CHECKLP
     
   ld   HL,(#_PT3_LPosPtr)
   LD   A,(HL)
@@ -604,43 +604,47 @@ PL2:
   XOR  A
   LD   HL,#_CurEDel
   OR   (HL)
+  JR   Z,IFSTOP
+  ;RET  Z
   
-  RET  Z
   DEC  (HL)
-  RET  NZ
+  ;RET  NZ
+  JR   NZ,IFSTOP
+  
   LD   A,(#_PT3_Env_Del)
   LD   (HL),A
   LD   HL,(#_PT3_ESldAdd)
   ADD  HL,DE
   LD   (#_CurESld),HL
   
-  
-;  LD   HL,#_PT3state
-;  BIT  1,(HL)   ; pause mode
-;  JP   Z,MUTE
+  RET
+
+IFSTOP:  
+  LD   HL,#_PT3state
+  BIT  1,(HL)   ; pause mode
+  JP   Z,MUTE
   
   RET
 
 
-;Check Loop
-CHECKLP:	
+;CHECKLP
+CHECK_LOOP:	
   LD   HL,#_PT3state
   ;SET  7,(HL)   ;loop control
   BIT  4,(HL)   ;loop bit 
   RET  NZ
   
 ;=0 - No loop
-
-;remove the lock if finished the song. Bug #11
   RES  1,(HL) ;set pause mode
   
-  POP  HL
-  LD   HL,#_DelyCnt
-  INC  (HL)
+;  POP  HL
+;  LD   HL,#_DelyCnt
+;  INC  (HL)
 ;  LD   HL,#_ChanA+CHNPRM_NtSkCn
 ;  INC  (HL)
-    
-  JP   MUTE
+  
+  ret  
+;  JP   MUTE
 
 
 
