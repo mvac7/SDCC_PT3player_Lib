@@ -202,30 +202,6 @@ __endasm;
 
 
 
-
-/* =============================================================================
- PT3_Mute
- Description: Silence the PSG
- Input:       -
- Output:      -
-============================================================================= */
-void PT3_Mute() __naked
-{
-__asm
-MUTE:	
-  XOR  A
-  LD   (#_AYREGS+AR_AmplA),A
-  LD   (#_AYREGS+AR_AmplB),A
-  LD   (#_AYREGS+AR_AmplC),A
- 
-  JP   _PT3_PlayAY                ;ROUT_A0
-  
-__endasm;
-}
-// ----------------------------------------------------------------------------- END PT3_Mute
-
-
-
 /* =============================================================================
  PT3_Pause
  Description: Pause song playback
@@ -235,10 +211,17 @@ __endasm;
 void PT3_Pause() __naked
 {
 __asm
-   LD   HL,#_PT3state       
-   RES  1,(HL)
+  LD   HL,#_PT3state       
+  RES  1,(HL)
    
-   jp   MUTE
+MUTE:	
+  XOR  A
+  LD   (#_AYREGS+AR_AmplA),A
+  LD   (#_AYREGS+AR_AmplB),A
+  LD   (#_AYREGS+AR_AmplC),A
+  
+  JP   _PT3_PlayAY                ;ROUT_A0
+  
 __endasm;
 }
 // ----------------------------------------------------------------------------- <<< END PT3_Pause
