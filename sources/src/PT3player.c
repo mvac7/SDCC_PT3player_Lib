@@ -1,7 +1,7 @@
 /* =============================================================================
    SDCC Vortex Tracker II PT3 player for MSX
 
-   Version: 1.1.5 (22/01/2021)
+   Version: 1.1.6 (15/02/2021)
    Architecture: MSX
    Format: C Object (SDCC .rel)
    Programming language: C and Z80 assembler
@@ -21,7 +21,9 @@
      software development in C (SDCC). 
      
    History of versions:
-    - 1.1.5 (22/01/2021)>Adjusted to work without the 100 Byte header
+    - 1.2   (?/2021) Release version
+    - 1.1.6 (15/02/2021)>same function names in music libraries 
+    - 1.1.5 (22/01/2021) Adjusted to work without the 100 Byte header
     - 1.1.4 (08/01/2021) PT3_Init and Bug #11 in loop
     - 1.1.3 (05/01/2021) PT3state, PT3_Loop, PT3_Pause and PT3_Resume
     - 1.1.2 (04/01/2021) assignment of frequency table memory address to NoteTable 
@@ -143,12 +145,12 @@ unsigned int NoteTable;   //note table memory address
 
 
 /* =============================================================================
- PT3_Init
+ Player_Init
  Description: Initialize the Player
  Input:       -
  Output:      -
 ============================================================================= */
-void PT3_Init() __naked
+void Player_Init() __naked
 {
 __asm
 
@@ -203,12 +205,12 @@ __endasm;
 
 
 /* =============================================================================
- PT3_Pause
+ Player_Pause
  Description: Pause song playback
  Input:       -
  Output:      -
 ============================================================================= */
-void PT3_Pause() __naked
+void Player_Pause() __naked
 {
 __asm
   LD   HL,#_PT3state       
@@ -220,21 +222,21 @@ MUTE:
   LD   (#_AYREGS+AR_AmplB),A
   LD   (#_AYREGS+AR_AmplC),A
   
-  JP   _PT3_PlayAY                ;ROUT_A0
+  JP   _PlayAY                ;ROUT_A0
   
 __endasm;
 }
-// ----------------------------------------------------------------------------- <<< END PT3_Pause
+// ----------------------------------------------------------------------------- <<< END Player_Pause
 
 
 
 /* =============================================================================
- PT3_Resume
+ Player_Resume
  Description: Resume song playback
  Input:       -
  Output:      -
 ============================================================================= */  	
-void PT3_Resume() __naked
+void Player_Resume() __naked
 {
 __asm
    LD      HL,#_PT3state       
@@ -243,18 +245,18 @@ __asm
    ret
 __endasm;
 }
-// ----------------------------------------------------------------------------- <<< END PT3_Resume
+// ----------------------------------------------------------------------------- <<< END Player_Resume
 
 
 
 
 /* =============================================================================
- PT3_Loop
+ Player_Loop
  Description: Change state of loop
  Input:       - 0=off ; 1=on  (false = 0, true = 1)
  Output:      -
 ============================================================================= */
-void PT3_Loop(char loop) __naked
+void Player_Loop(char loop) __naked
 {
 loop;
 __asm 
@@ -286,11 +288,14 @@ __endasm;
 
 
 /* -----------------------------------------------------------------------------
-PT3_InitSong
-(unsigned int) Song data address
-(char) Loop - 0=off ; 1=on  (false = 0, true = 1));
+ Player_InitSong
+ Description: Initialize song
+ Input: (unsigned int) Song data address. 
+                       Subtract 100 if you delete the header of the PT3 file.
+        (char) Loop - 0=off ; 1=on  (false = 0, true = 1));
+ Output:      -
 ----------------------------------------------------------------------------- */
-void PT3_InitSong(unsigned int songADDR, char loop) __naked
+void Player_InitSong(unsigned int songADDR, char loop) __naked
 {
 songADDR;loop;
 __asm
@@ -404,13 +409,14 @@ __endasm;
 
 
 /* -----------------------------------------------------------------------------
-PT3PlayAY
-Play Song. 
-Send data to AY registers
-Execute on each interruption of VBLANK
+ PlayAY
+ Description: Play Song. 
+              Send data form AYREGS buffer to AY registers
+              Execute on each interruption of VBLANK
+ Input:       -
+ Output:      -
 ----------------------------------------------------------------------------- */
-//_PT3PlayAY::
-void PT3_PlayAY() __naked
+void PlayAY() __naked
 {
 __asm  
 
@@ -456,10 +462,12 @@ __endasm;
 
 
 /* -----------------------------------------------------------------------------
-PT3Decode
-Decode a frame from PT3 song
+ Player_Decode
+ Description: Process the next step in the song sequence
+ Input:       -
+ Output:      - 
 ----------------------------------------------------------------------------- */
-void PT3_Decode() __naked
+void Player_Decode() __naked
 {
 __asm   
  

@@ -202,74 +202,76 @@ extern unsigned int NoteTable;   //note table memory address
 
 
 /* =============================================================================
- PT3_Init
+ Player_Init
  Description: Initialize the Player
  Input:       -
  Output:      -
 ============================================================================= */
-void PT3_Init();
-
-
-
-
-//void PT3_Mute();
+void Player_Init();
 
 
 
 /* =============================================================================
- PT3_Loop
+ Player_Loop
  Description: Change state of loop
  Input:       - 0=off ; 1=on  (false = 0, true = 1)
  Output:      -
 ============================================================================= */
-void PT3_Loop(char loop); 
+void Player_Loop(char loop); 
 
 
 
 /* =============================================================================
- PT3_Pause
+ Player_Pause
  Description: Pause song playback
  Input:       -
  Output:      -
 ============================================================================= */
-void PT3_Pause();
+void Player_Pause();
 
 
 
 /* =============================================================================
- PT3_Resume
+ Player_Resume
  Description: Resume song playback
  Input:       -
  Output:      -
 ============================================================================= */  	
-void PT3_Resume();
+void Player_Resume();
 
 
 
 /* -----------------------------------------------------------------------------
-PT3_InitSong
-(unsigned int) Song data address. Subtract 100 if you delete the header of the PT3 file.
-(char) Loop - 0=off ; 1=on  (false = 0, true = 1));
+ Player_InitSong
+ Description: Initialize song
+ Input: (unsigned int) Song data address. 
+                       Subtract 100 if you delete the header of the PT3 file.
+        (char) Loop - 0=off ; 1=on  (false = 0, true = 1));
+ Output:      -
 ----------------------------------------------------------------------------- */
-void PT3_InitSong(unsigned int songADDR, char loop);
+void Player_InitSong(unsigned int songADDR, char loop);
 
 
 
 /* -----------------------------------------------------------------------------
-PT3PlayAY
-Play Song. 
-Send data to AY registers
-Execute on each interruption of VBLANK
+ PlayAY
+ Description: Play Song. 
+              Send data form AYREGS buffer to AY registers
+              Execute on each interruption of VBLANK
+ Input:       -
+ Output:      -
 ----------------------------------------------------------------------------- */
-void PT3_PlayAY();
+void PlayAY();
 
 
 
 /* -----------------------------------------------------------------------------
-PT3Decode
-Decode a frame from PT3 song
+ Player_Decode
+ Description: Process the next step in the song sequence
+ Input:       -
+ Output:      - 
 ----------------------------------------------------------------------------- */
-void PT3_Decode(); 
+void Player_Decode(); 
 
 
 

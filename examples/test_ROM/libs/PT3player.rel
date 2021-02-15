@@ -4,14 +4,14 @@ M PT3player
 O -mz80
 S .__.ABS. Def0000
 A _CODE size 55A flags 0 addr 0
-S _PT3_InitSong Def006E
 S playerINIT Def0095
-S _PT3_PlayAY Def0101
-S _PT3_Resume Def004D
-S _PT3_Pause Def003B
-S _PT3_Decode Def012D
-S _PT3_Init Def0000
-S _PT3_Loop Def0053
+S _Player_Loop Def0053
+S _PlayAY Def0101
+S _Player_InitSong Def006E
+S _Player_Resume Def004D
+S _Player_Pause Def003B
+S _Player_Decode Def012D
+S _Player_Init Def0000
 A _DATA size 180 flags 0 addr 0
 S _EnvBase Def006B
 S _PT3_CrPsPtr Def0160

@@ -67,7 +67,6 @@ I want to give a special thanks to all those who freely share their knowledge wi
 * [Fubukimaru](https://github.com/Fubukimaru) > [(Blog)](http://www.gamerachan.org/fubu/)
 * Andrear > [(Blog)](http://andrear.altervista.org/home/msxsoftware.php)
 * Ramones > [(MSXblog)](https://www.msxblog.es/tutoriales-de-programacion-en-ensamblador-ramones/) - [(MSXbanzai)](http://msxbanzai.tni.nl/dev/faq.html)
-* Fernando García > [(youTube)](https://www.youtube.com/user/bitvision)
 * Eric Boez > [(gitHub)](https://github.com/ericb59)
 * MSX Assembly Page > [(WEB)](http://map.grauw.nl/resources/msxbios.php)
 * Portar MSX Tech Doc > [(WEB)](https://problemkaputt.de/portar.htm)
@@ -90,13 +89,13 @@ I want to give a special thanks to all those who freely share their knowledge wi
 
 ## Functions
 
-* **PT3_Init**() Initialize the Player.
-* **PT3_InitSong**(unsigned int songADDR, char loop) Initialize song (songADDR -> Song data address ; loop -> 0=off ; 1=on)
-* **PT3_PlayAY**() Send data to AY registers. Execute on each interruption of VBLANK
-* **PT3_Decode**() Process the next step in the song sequence.
-* **PT3_Loop**(char loop) Change state of loop (0=off ; 1=on)
-* **PT3_Pause**() Pause song playback.
-* **PT3_Resume**() Resume song playback.
+* **Player_Init**() Initialize the Player.
+* **Player_InitSong**(unsigned int songADDR, char loop) Initialize song (songADDR -> Song data address ; loop -> 0=off ; 1=on)
+* **PlayAY**() Send data from AYREGS buffer to AY registers. (Execute on each interruption of VBLANK)
+* **Player_Decode**() Process the next step in the song sequence.
+* **Player_Loop**(char loop) Change state of loop (0=off ; 1=on)
+* **Player_Pause**() Pause song playback.
+* **Player_Resume**() Resume song playback.
 
 
 
@@ -107,11 +106,11 @@ Follow the next steps:
 1) Create a song in PT3 format with the Vortex Tracker.
 2) Dump the file into C code, in a constant array of char and save it as a header (.h).
 3) Include the header with the song data in your main source. 
-4) Initialize the player by executing **PT3_Init()** and assign the frequency table (__NoteTable = (unsigned int) NT;__). 
-5) Initialize the song to play with **PT3_InitSong**.
-6) At each VBLANK interrupt, execute **PT3_PlayAY()**. This function dumps the AY record values and makes it sound.
-7) Execute **PT3_Decode()** in your code in each frame, to process the song data.
-8) You can stop song playback by executing **PT3_Pause()** and resume with **PT3_Resume()**.
+4) Initialize the player by executing **Player_Init()** and assign the frequency table (__NoteTable = (unsigned int) NT;__). 
+5) Initialize the song to play with **Player_InitSong**.
+6) At each VBLANK interrupt, execute **PlayAY()**. This function dumps the AY record values and makes it sound.
+7) Execute **Player_Decode()** in your code in each frame, to process the song data.
+8) You can stop song playback by executing **Player_Pause()** and resume with **Player_Resume()**.
 9) To play another song, repeat these steps starting with number 5.
 
 
@@ -129,16 +128,16 @@ void main(void)
 {
 
     NoteTable = (unsigned int) NT;
-    PT3_Init();
+    Player_Init();
     
-    PT3_InitSong((unsigned int) SONG00, Loop_OFF);
+    Player_InitSong((unsigned int) SONG00, Loop_OFF);
     
     while(1)
     {
       HALT;
 
-      PT3_PlayAY();      
-      PT3_Decode();
+      PlayAY();      
+      Player_Decode();
       
       //your code here --->
             
@@ -153,7 +152,7 @@ void main(void)
 
 To include the songs in your program you need to convert the PT3s files to C data and save them as a header (.h).
 
-To do this, you have the PT3toCdata utility for Windows, designed for the format that this library needs, but if you cannot run it on your system, you will need an application that dumps binaries into C code.
+To do this, you have the [PT3toCdata](https://github.com/mvac7/PT3toCdata) tool for Windows, designed for the format that this library needs, but if you cannot run it on your system, you will need an application that dumps binaries into C code.
 
 The current version of the player is designed so that the data block does not contain the 100-byte header.
 For it to work properly, you will have to remove it from the data obtained.
@@ -167,8 +166,8 @@ You can use the "SONG00" tag and number each song (Look at the example).
 ```
 // Vortex Tracker II 1.0 
 
-const char SONG00_name[] = "A funny day with my MSX";
-const char SONG00_author[] = "Makinavaja";
+const char SONG00_name[] = "A funny day with my MSX";  //optional data
+const char SONG00_author[] = "Makinavaja";             //optional data
 
 // maki_ru50inv.pt3
 // Length: 2885

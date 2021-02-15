@@ -1,6 +1,6 @@
 /* =============================================================================
   Test PT3 player Library for SDCC
-  Version: 1.5 (28/01/2021)
+  Version: 1.6 (15/02/2021)
   Author: (test program) mvac7 <mvac7303b@gmail.com>
   Architecture: MSX
   Format: ROM 16K
@@ -10,6 +10,7 @@
 
     
   History of versions:
+    - 1.6 (15/02/2021) Adaptation to PT3_Player v1.1.6 (function names)
     - 1.5 (28/01/2021) support for multiple songs
     - 1.4 (07/01/2021)
     - 1.3 (06/01/2021) Test PT3_Loop
@@ -78,7 +79,7 @@ void PrintF(char* text, char length);
 
 // constants  ------------------------------------------------------------------
 const char text01[] = "Test PT3player v1.2 Lib";
-const char text02[] = "v1.5 (28/01/2021)";
+const char text02[] = "v1.6 (15/02/2021)";
 
 const char presskey[] = "Press a key to Play";
 
@@ -114,7 +115,7 @@ void my_isr0(void) __interrupt
 
 __asm push  AF __endasm;
   
-    PT3_PlayAY();
+    PlayAY();
 
 __asm  
   ;vuelca a VRAM buffer atributos sprites
@@ -164,7 +165,7 @@ void main(void)
   
   // Initialize the Player
   NoteTable = (unsigned int) NT;
-  PT3_Init();
+  Player_Init();
   //
   
     
@@ -234,7 +235,7 @@ void main(void)
     }else Row7pressed=false;
     
     
-    PT3_Decode();  //Process the next step in the song sequence
+    Player_Decode();  //Process the next step in the song sequence
 
     
   }
@@ -253,8 +254,8 @@ void main(void)
 void Pause()
 {
     
-   if ((PT3state & Bit1)) PT3_Pause();
-   else PT3_Resume();
+   if ((PT3state & Bit1)) Player_Pause();
+   else Player_Resume();
    
 }
 
@@ -263,7 +264,7 @@ void SwapLoop()
 {
   _loop = !_loop;
   
-  PT3_Loop(_loop);
+  Player_Loop(_loop);
   ShowLoop();
 }
 
@@ -272,7 +273,7 @@ void SwapLoop()
 void PlaySong(char songNumber)
 { 
   //PT3Init((unsigned int) SONG00 - 100,0); // Subtract 100 if you delete the header of the PT3 file.    
-  PT3_InitSong(songPT3Data[songNumber], _loop);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on
+  Player_InitSong(songPT3Data[songNumber], _loop);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on
   
   firstPATaddr = PT3_CrPsPtr;
   
