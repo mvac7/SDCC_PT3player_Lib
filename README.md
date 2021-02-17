@@ -60,7 +60,8 @@ I want to give a special thanks to all those who freely share their knowledge wi
 * Alfonso D. C. aka Dioniso
 * MSXKun/Paxanga soft > [(WEB)](http://paxangasoft.retroinvaders.com/)
 * Sapphire/Z80ST > [(WEB)](http://z80st.auic.es/)
-* Makinavaja for his music. [(SoundCloud)](https://soundcloud.com/makimsx) 
+* Makinavaja for his music. [(SoundCloud)](https://soundcloud.com/makimsx)
+* Aoineko [(GitHub)](https://github.com/aoineko-fr)
 * Avelino Herrera > [(WEB)](http://msx.atlantes.org/index_es.html)
 * Nerlaska > [(Blog)](http://albertodehoyonebot.blogspot.com.es)
 * Marq/Lieves!Tuore > [(Marq)](http://www.kameli.net/marq/) [(Lieves!Tuore)](http://www.kameli.net/lt/)
@@ -83,7 +84,7 @@ I want to give a special thanks to all those who freely share their knowledge wi
 * Small Device C Compiler (SDCC) v3.9 http://sdcc.sourceforge.net/
 * Hex2bin v2.5 http://hex2bin.sourceforge.net/ 
 * Vortex Tracker II > https://bulba.untergrund.net/vortex_e.htm (for create PT3 songs)
-* A software to dump a PT3 binary file in C format. [PT3toCdata mSXdevtools](https://github.com/mvac7/PT3toCdata)
+* A software to dump a PT3 binary file in C format. [PT3toCdata mSXdevtools](https://github.com/mvac7/PT3toCdata) or Aoineko's [CMSXbin](https://github.com/aoineko-fr/CMSXbin)
 
 
 
@@ -152,7 +153,8 @@ void main(void)
 
 To include the songs in your program you need to convert the PT3s files to C data and save them as a header (.h).
 
-To do this, you have the [PT3toCdata](https://github.com/mvac7/PT3toCdata) tool for Windows, designed for the format that this library needs, but if you cannot run it on your system, you will need an application that dumps binaries into C code.
+To do this, you have the [PT3toCdata](https://github.com/mvac7/PT3toCdata) tool for Windows, designed for the format that this library needs, but if you cannot run it on your system, you will need an application that dumps binaries into C code. 
+You can use Aoineko's [CMSXbin](https://github.com/aoineko-fr/CMSXbin) application.
 
 The current version of the player is designed so that the data block does not contain the 100-byte header.
 For it to work properly, you will have to remove it from the data obtained.
