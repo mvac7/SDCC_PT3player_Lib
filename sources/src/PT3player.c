@@ -1,7 +1,7 @@
 /* =============================================================================
    SDCC Vortex Tracker II PT3 player for MSX
 
-   Version: 1.1.6 (15/02/2021)
+   Version: 1.1.7 (24/03/2021)
    Architecture: MSX
    Format: C Object (SDCC .rel)
    Programming language: C and Z80 assembler
@@ -153,7 +153,8 @@ unsigned int NoteTable;   //note table memory address
 void Player_Init() __naked
 {
 __asm
-
+  push IX
+  
 ; Create Volume Table for Vortex Tracker II/PT3.5
 ; (c) Ivan Roshin, adapted by SapphiRe ---
   ld   HL,#0x11
@@ -197,6 +198,7 @@ CLEAR_REGS:
   LD   (HL),A
   LDIR  
   
+  pop  IX
   ret
 __endasm;
 }
@@ -427,8 +429,8 @@ __asm
   ld   A,#AR_Mixer
   out  (#AY0index),A
   in   A,(#AY0read)  
-  and	 #0b11000000	; Mascara para coger dos bits de joys 
-  or	 B		        ; Añado Byte de B
+  and  #0b11000000	; Mascara para coger dos bits de joys 
+  or   B		        ; Añado Byte de B
   
   ld   (#_AYREGS+AR_Mixer),A
    
@@ -470,7 +472,14 @@ __endasm;
 void Player_Decode() __naked
 {
 __asm   
- 
+  push IX
+  
+  call PT3_PLAY
+  
+  pop  IX
+  ret
+
+PT3_PLAY:  
   LD   HL,#_PT3state       ;PLAY BIT 1 ON?
   BIT  1,(HL)
   RET  Z
