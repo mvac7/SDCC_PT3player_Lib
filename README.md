@@ -24,7 +24,7 @@ In examples/test_ROM software, PT3 songs:
 
 
 ## History of versions:
-- 1.2 (??/01/2021)>Assignment of frequency table memory address to NoteTable, PT3state, PT3_Loop, PT3_Pause and PT3_Resume.
+- 1.2 (?)>Assignment of frequency table memory address to NoteTable, PT3state, Player_Loop, Player_Pause, Player_Resume and Player_IsEnd.
 - 1.1 (28/05/2019) Adaptation to SDCC of asMSX version by SapphiRe.
 - 1.0 (21/10/2016) Adaptation to SDCC of the ROM version by Kun.
 
@@ -90,13 +90,14 @@ I want to give a special thanks to all those who freely share their knowledge wi
 
 ## Functions
 
-* **Player_Init**() Initialize the Player.
-* **Player_InitSong**(unsigned int songADDR, char loop) Initialize song (songADDR -> Song data address ; loop -> 0=off ; 1=on)
-* **PlayAY**() Send data from AYREGS buffer to AY registers. (Execute on each interruption of VBLANK)
-* **Player_Decode**() Process the next step in the song sequence.
-* **Player_Loop**(char loop) Change state of loop (0=off ; 1=on)
-* **Player_Pause**() Pause song playback.
-* **Player_Resume**() Resume song playback.
+* **Player_Init()** Initialize the Player.
+* **Player_InitSong(unsigned int songADDR, char loop)** Initialize song `(songADDR -> Song data address ; loop -> 0=off ; 1=on)`
+* **PlayAY()** Send data from AYREGS buffer to AY registers. (Execute on each interruption of VBLANK)
+* **Player_Decode()** Process the next step in the song sequence.
+* **Player_Loop(char loop)** Change state of loop `(0=off ; 1=on)`
+* **Player_Pause()** Pause song playback.
+* **Player_Resume()** Resume song playback.
+* **char Player_IsEnd()** Indicates whether the song has finished playing. `(0 = No, 1 = Yes)`
 
 
 
@@ -107,11 +108,11 @@ Follow the next steps:
 1) Create a song in PT3 format with the Vortex Tracker.
 2) Dump the file into C code, in a constant array of char and save it as a header (.h).
 3) Include the header with the song data in your main source. 
-4) Initialize the player by executing **Player_Init()** and assign the frequency table (__NoteTable = (unsigned int) NT;__). 
-5) Initialize the song to play with **Player_InitSong**.
-6) At each VBLANK interrupt, execute **PlayAY()**. This function dumps the AY record values and makes it sound.
-7) Execute **Player_Decode()** in your code in each frame, to process the song data.
-8) You can stop song playback by executing **Player_Pause()** and resume with **Player_Resume()**.
+4) Initialize the player by executing `Player_Init()` and assign the frequency table `NoteTable = (unsigned int) NT;` 
+5) Initialize the song to play with `Player_InitSong(songADDR,loop)`
+6) At each VBLANK interrupt, execute `PlayAY()`. This function dumps the AY record values and makes it sound.
+7) Execute `Player_Decode()` in your code in each frame, to process the song data.
+8) You can stop song playback by executing `Player_Pause()` and resume with `Player_Resume()`
 9) To play another song, repeat these steps starting with number 5.
 
 

@@ -27,8 +27,7 @@
 #include "../include/interrupt.h"
 #include "../include/memory.h"
 #include "../include/keyboard.h"
-#include "../include/VDP_TMS9918A_MSXROM.h"
-#include "../include/VDP_PRINT.h"
+#include "../include/textmode.h"
 #include "../include/unRLEWBtoVRAM.h"
 
 #include "../include/PT3player.h"
@@ -65,6 +64,10 @@
 
 
 // Function Declarations -------------------------------------------------------
+void SetSpritesSize(char size);
+
+void VPOKE(unsigned int vaddr, char value);
+//char VPEEK(uint address);
 
 void WAIT(uint cicles);
 
@@ -84,13 +87,13 @@ void ShowPlayback();
 void ShowENDsong();
 
 
-//void PrintF(char* text, char length);
+void PrintF(char* text, char length);
 
 
 
 // constants  ------------------------------------------------------------------
 const char text01[] = "Test PT3player v1.2 Lib";
-const char text02[] = "v1.7 (16/04/2021)";
+const char text02[] = "v1.6 (15/02/2021)";
 
 const char presskey[] = "Press a key to Play";
 
@@ -201,6 +204,9 @@ char _loop;
 // Routine for Hook TIMI (FD9Fh)
 void my_isr0(void) __interrupt 
 {
+	//DI;
+	//READ_VDP_STATUS;     <<---- It is not necessary as the ISR in the BIOS does.
+
 __asm push  AF __endasm;
   
     PlayAY();
@@ -213,8 +219,9 @@ __asm
   call 0x005C  
 __endasm;
 
-__asm pop   AF __endasm;
+__asm pop   AF __endasm;       
 
+  //EI;
 }
 
 
@@ -241,15 +248,17 @@ void main(void)
    
   COLOR(WHITE,DARK_BLUE,LIGHT_BLUE);
           
-  //WIDTH(32);
-  SCREEN(1);    
+  WIDTH(32);
+  SCREEN1();    
   SetSpritesSize(1);
   
   unRLEWBtoVRAM((uint) SC1_TSET, BASE7);
   unRLEWBtoVRAM((uint) SC1_TSET_COLOR, BASE6);   
   
-  VPRINT(0,0,text01);
-  VPRINT(0,1,text02);
+  LOCATE(0,0);
+  PRINT(text01);
+  PRINT("\n");
+  PRINT(text02);
   
   // Initialize the Player
   NoteTable = (unsigned int) NT;
@@ -260,12 +269,14 @@ void main(void)
   _loop = Loop_OFF;
   
             
-  VPRINT(0,3,"F1/F2  Play a song"); 
+  LOCATE(0,3);
+  PRINT("F1/F2  Play a song\n"); 
   //PRINT("RETURN Play the song\n");
-  VPRINT(0,4,"STOP   Pause/Resume playback");
-  VPRINT(0,5,"TAB    Change Loop mode");
+  PRINT("STOP   Pause/Resume playback\n");
+  PRINT("TAB    Change Loop mode\n");
   
-  VPRINT(0,23,"PLAY:     LOOP:     END:");
+  LOCATE(0,23);
+  PRINT("PLAY:     LOOP:     END:");
     
   SetSPRITES();
   
@@ -276,10 +287,11 @@ void main(void)
     HALT;
       
     
-    if (PT3state & Bit1)
+    if ((PT3state & Bit1))
     {
         songStep=PT3_CrPsPtr - firstPATaddr;
-        VPrintNumber(7,13,songStep,3);
+        LOCATE(7,13);
+        PrintFNumber(songStep,32,3);
         //LOCATE(25,13);
         //PrintFNumber(PEEKW(PT3_LPosPtr),32,5);
     }
@@ -350,7 +362,6 @@ void Pause()
 }
 
 
-
 void SwapLoop()
 {
   _loop = !_loop;
@@ -364,39 +375,43 @@ void SwapLoop()
 void PlaySong(char songNumber)
 {
   DI;
-  //uninstall_isr();
    
   //PT3Init((unsigned int) SONG00 - 100,0); // Subtract 100 if you delete the header of the PT3 file.    
   Player_InitSong(songPT3Data[songNumber], _loop);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on
   
   firstPATaddr = PT3_CrPsPtr;
   
-  VPRINT(0,9,"Song  :   ");
-  VPrintNumber(7,9,songNumber+1,1);
+  LOCATE(0,9);  
+  PRINT("Song  :   ");
+  LOCATE(7,9);
+  PrintFNumber(songNumber+1,32,1);
   
-  VPRINT(0,10,"Name  :                         ");
-  VPRINTN(7,10,(char*) songNames[songNumber],25);
+  LOCATE(0,10);
+  PRINT("Name  :                         ");
+  LOCATE(7,10);
+  PrintF((char*) songNames[songNumber],25);
   
-  VPRINT(0,11,"Author:                         ");
-  VPRINTN(7,11,(char*) songAuthors[songNumber],25);
+  LOCATE(0,11);
+  PRINT("Author:                         ");
+  LOCATE(7,11);
+  PrintF((char*) songAuthors[songNumber],25);
   
-  VPRINT(0,13,"Pos.  :");
+  LOCATE(0,13);    
+  PRINT("Pos.  :    ");
   
   //PRINT("\nTempo : ");
   //PrintFNumber(TEMPO,32,2);
   
   //ShowLoop();
-  
-  //install_isr(my_isr0);
   EI;
 }
 
 
 
-/*void PrintF(char* text, char length)
+void PrintF(char* text, char length)
 { 
   while(*(text) && length-->0)  bchput(*(text++));
-}*/
+}
 
 
 
@@ -423,6 +438,113 @@ void ShowENDsong()
   else ShowState(BASE5+760,false);
 }
 
+
+
+/* =============================================================================
+ SetSpritesSize
+ Description: Set size type for the sprites.
+ Input:       [char] size: 0=8x8; 1=16x16
+ Output:      -
+============================================================================= */ 
+void SetSpritesSize(char size) __naked
+{
+size;
+__asm
+  push IX
+  ld   IX,#0
+  add  IX,SP
+  
+  ld   HL,#RG0SAV+1 ; --- read vdp(1) from mem
+  ld   B,(HL)
+
+  ld   A,4(ix)    
+  cp   #1
+  jr   NZ,size8
+  
+  set  1,B ; 16x16
+  jr   setSize
+  
+size8:
+  res  1,B  ; 8x8    
+
+setSize:  
+  ld   C,#0x01
+  call writeVDP
+  
+  pop  IX
+  ret
+  
+  
+writeVDP:
+
+  ld   IY,#RG0SAV
+  ld   E,C
+  ld   D,#0
+  add  IY,DE
+  ld   (IY),B ;save copy of vdp value in system var
+  
+  ld   A,B
+  di
+  out	 (#VDPSTATUS),A
+  ld   A,C
+  or   #0x80            ;add 128 to VDP reg value
+  out	 (#VDPSTATUS),A
+  ei
+  ret
+
+__endasm;
+}
+
+
+
+/* =============================================================================
+ VPOKE
+ Description: Writes a byte to the video RAM. 
+ Input      : [unsigned int] VRAM address
+              [char] value
+ Output     : - 
+============================================================================= */
+void VPOKE(unsigned int vaddr, char value) __naked
+{
+vaddr;
+value;
+__asm
+  push IX
+  ld   IX,#0
+  add  IX,SP
+  
+  ld   L,4(IX)
+  ld   H,5(IX)
+   
+  ld   A,6(IX)
+  
+  call WRTVRM
+  
+  pop  IX
+  ret
+__endasm;
+}
+
+
+
+/*char VPEEK(uint address) __naked
+{
+address;
+__asm
+  push IX
+  ld   IX,#0
+  add  IX,SP
+    
+  ld   L,4(IX)
+  ld   H,5(IX) 
+   
+  call RDVRM
+  
+  ld   L,A
+  pop  IX
+  ret
+__endasm;
+}*/
 
 
 
@@ -453,8 +575,7 @@ void ShowState(uint vaddr, boolean state)
 }
 
 
-
-void ShowVumeter(char channel, char value) __naked
+void ShowVumeter(char channel, char value)
 {
 channel;value;
 __asm
@@ -522,12 +643,12 @@ L00105:
 	inc	 C
 	inc	 B
 	ld	 A,B
-    cp   #4
+  cp   #4
 	jr	C,L00107
   
 
   pop  IX
-  ret
+;  ret
   
 __endasm;
 }
@@ -538,8 +659,7 @@ void SetSPRITES() __naked
 {
 __asm
 
-  push IX
-  
+
   ld   HL,#SPRITE_DATA
   ld   DE,#BASE14  
   ld   BC,#32*5
@@ -550,7 +670,6 @@ __asm
   ld   BC,#64
   ldir
   
-  pop  IX
   ret
   
 

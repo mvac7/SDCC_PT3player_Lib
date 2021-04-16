@@ -1,7 +1,7 @@
 /* =============================================================================
    SDCC Vortex Tracker II PT3 player for MSX
 
-   Version: 1.1.7 (24/03/2021)
+   Version: 1.1.8 (16/04/2021)
    Architecture: MSX
    Format: C Object (SDCC .rel)
    Programming language: C and Z80 assembler
@@ -21,8 +21,9 @@
      software development in C (SDCC). 
      
    History of versions:
-    - 1.2   (?/2021) Release version
-    - 1.1.6 (15/02/2021)>same function names in music libraries 
+    - 1.1.8 (16/04/2021) add Player_IsEnd() function
+    - 1.1.7 (24/03/2021)
+    - 1.1.6 (15/02/2021) same function names in music libraries 
     - 1.1.5 (22/01/2021) Adjusted to work without the 100 Byte header
     - 1.1.4 (08/01/2021) PT3_Init and Bug #11 in loop
     - 1.1.3 (05/01/2021) PT3state, PT3_Loop, PT3_Pause and PT3_Resume
@@ -92,7 +93,7 @@ Switches: 1=ON; 0=OFF
 - BIT 2 = ?
 - BIT 3 = ?
 - BIT 4 = LOOP ON/OFF
-- BIT 7 = set each time, when loop point is passed 
+- BIT 7 = is END? YES/NO           OLD: set each time, when loop point is passed 
 */
 char PT3state;  //before called PT3_SETUP
 
@@ -251,6 +252,31 @@ __endasm;
 
 
 
+/* -----------------------------------------------------------------------------
+ Player_IsEnd
+ Description: Indicates whether the song has finished playing
+ Input:       -
+ Output:      [char] 0 = No, 1 = Yes 
+----------------------------------------------------------------------------- */
+char Player_IsEnd() __naked
+{
+__asm
+    xor  A
+    
+    LD   HL,#_PT3state
+    BIT  7,(HL)
+    jr   Z,retPlayerEndState
+    ld   A,#1
+    
+retPlayerEndState:    
+    ld   L,A
+    ret  
+__endasm;
+}
+
+
+
+
 
 /* =============================================================================
  Player_Loop
@@ -309,6 +335,7 @@ __asm
   xor  A
   ld   HL,#_PT3state
   ld   (HL),A
+  
   SET  1,(HL)      ;PLAYER ON  
   
   ld   A,6(IX)
@@ -330,7 +357,7 @@ initSong:
 
 
 ; HL - AddressOfModule
-playerINIT::
+playerINIT:
   ld   DE,#100
   sbc  HL,DE
   
@@ -636,6 +663,7 @@ CHECK_LOOP:
   
 ;=0 - No loop
   RES  1,(HL) ;set pause mode
+  SET  7,(HL)   ;END song
   
 ;  POP  HL
 ;  LD   HL,#_DelyCnt

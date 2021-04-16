@@ -10,12 +10,9 @@
 	To write your own ISR:
 
 	void my_isr(void) interrupt {
-		DI;
-		READ_VDP_STATUS;
 		...
 		your code goes here
 		...
-		EI;
 	}
 
 

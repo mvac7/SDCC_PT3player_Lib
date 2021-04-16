@@ -156,7 +156,7 @@ Switches: 1=ON; 0=OFF
 - BIT 2 = ?
 - BIT 3 = ?
 - BIT 4 = LOOP ON/OFF
-- BIT 7 = set each time, when loop point is passed 
+- BIT 7 = is END? YES/NO
 */
 extern char PT3state; //before called PT3_SETUP
 
@@ -273,6 +273,16 @@ void PlayAY();
 ----------------------------------------------------------------------------- */
 void Player_Decode(); 
 
+
+
+
+/* -----------------------------------------------------------------------------
+ Player_IsEnd
+ Description: Indicates whether the song has finished playing
+ Input:       -
+ Output:      [char] 0 = No, 1 = Yes 
+----------------------------------------------------------------------------- */
+char Player_IsEnd();
 
 
 
