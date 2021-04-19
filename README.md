@@ -143,6 +143,8 @@ void main(void)
       PlayAY();      
       Player_Decode();
       
+      if (Player_IsEnd()==1) break;
+      
       //your code here --->
             
     }
