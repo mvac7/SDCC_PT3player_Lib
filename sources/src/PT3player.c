@@ -60,7 +60,15 @@ mvac7 version:
 #include "../include/PT3player.h"
 
 
+//Internal AY
+#define AY0index 0xA0
+#define AY0write 0xA1
+#define AY0read  0xA2
 
+//External AY
+/*#define AY0index 0x10
+#define AY0write 0x11
+#define AY0read  0x12*/
 
 
 //VARS:
@@ -449,6 +457,8 @@ void PlayAY() __naked
 {
 __asm  
 
+
+;control of I/O bits of register 7
   ld   A,(#_AYREGS+AR_Mixer)
   AND  #0b00111111
   ld   B,A
@@ -456,29 +466,33 @@ __asm
   ld   A,#AR_Mixer
   out  (#AY0index),A
   in   A,(#AY0read)  
-  and  #0b11000000	; Mascara para coger dos bits de joys 
-  or   B		        ; Añado Byte de B
+  and  #0b11000000	; Mask to catch two bits of joys 
+  or   B		    ; I add the new mixer state collected from the buffer
   
   ld   (#_AYREGS+AR_Mixer),A
    
   XOR  A
   
-  ld   C,#AY0index
+  ld   B,#13
+  ld   C,#AY0index +1
   ld   HL,#_AYREGS  
-LOUT:	
-  OUT  (C),A
-  INC  C
-  OUTI 
+AYloop:
   DEC  C
-  INC  A
-  CP   #13
-  JR   NZ,LOUT
-  OUT  (C),A
-  LD   A,(HL)
-  AND  A
+  OUT  (C),A      ;select AY reg
+  INC  C          ;
+  INC  A          ;next AY reg
+  OUTI            ;write value in AY reg / outi = out(C),(HL) / inc HL / dec B
+  JR   NZ,AYloop  ;next
+  
+;Envelope shape (reg 13)
+  DEC  C          
+  OUT  (C),A      
+  LD   A,(HL)     
+  AND  A          
   RET  M
+  
   INC  C
-  OUT  (C),A
+  OUT  (C),A  ; write enevelope shape value
   
   RET
   

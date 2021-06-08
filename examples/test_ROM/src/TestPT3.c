@@ -1,6 +1,6 @@
 /* =============================================================================
   Test PT3 player Library for SDCC
-  Version: 1.7 (16/04/2021)
+  Version: 1.8 (08/06/2021)
   Author: (test program) mvac7 <mvac7303b@gmail.com>
   Architecture: MSX
   Format: ROM 16K
@@ -10,6 +10,7 @@
 
     
   History of versions:
+    - 1.8 (08/06/2021) Bug #21 correction - First song fails 
     - 1.7 (16/04/2021) SC1 Tileset + Test Player_IsEnd() + show PT3state
     - 1.6 (15/02/2021) Adaptation to PT3_Player v1.1.6 (function names)
     - 1.5 (28/01/2021) support for multiple songs
@@ -90,7 +91,7 @@ void ShowENDsong();
 
 // constants  ------------------------------------------------------------------
 const char text01[] = "Test PT3player v1.2 Lib";
-const char text02[] = "v1.7 (16/04/2021)";
+const char text02[] = "v1.8 (8/06/2021)";
 
 const char presskey[] = "Press a key to Play";
 
@@ -363,10 +364,11 @@ void SwapLoop()
 
 void PlaySong(char songNumber)
 {
-  DI;
+  //DI;
   //uninstall_isr();
-   
-  //PT3Init((unsigned int) SONG00 - 100,0); // Subtract 100 if you delete the header of the PT3 file.    
+  
+  Player_Pause();
+      
   Player_InitSong(songPT3Data[songNumber], _loop);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on
   
   firstPATaddr = PT3_CrPsPtr;
@@ -381,14 +383,9 @@ void PlaySong(char songNumber)
   VPRINTN(7,11,(char*) songAuthors[songNumber],25);
   
   VPRINT(0,13,"Pos.  :");
-  
-  //PRINT("\nTempo : ");
-  //PrintFNumber(TEMPO,32,2);
-  
-  //ShowLoop();
-  
+   
   //install_isr(my_isr0);
-  EI;
+  //EI;
 }
 
 

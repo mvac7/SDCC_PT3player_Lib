@@ -56,10 +56,6 @@ mvac7 version:
 
 // Constants
 
-#define AY0index 0xA0
-#define AY0write 0xA1
-#define AY0read  0xA2
-
 
 //ChannelsVars
 //struc	CHNPRM
