@@ -285,9 +285,9 @@ void main(void)
         //PrintFNumber(PEEKW(PT3_LPosPtr),32,5);
     }
 
-    ShowVumeter(0,AYREGS[AR_AmplA]);
-    ShowVumeter(1,AYREGS[AR_AmplB]);
-    ShowVumeter(2,AYREGS[AR_AmplC]);    
+    ShowVumeter(0,AYREGS[AY_AmpA]);
+    ShowVumeter(1,AYREGS[AY_AmpB]);
+    ShowVumeter(2,AYREGS[AY_AmpC]);    
 
     
     // Keyboard row 6

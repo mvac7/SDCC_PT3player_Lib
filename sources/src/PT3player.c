@@ -229,9 +229,9 @@ __asm
    
 MUTE:	
   XOR  A
-  LD   (#_AYREGS+AR_AmplA),A
-  LD   (#_AYREGS+AR_AmplB),A
-  LD   (#_AYREGS+AR_AmplC),A
+  LD   (#_AYREGS+AY_AmpA),A
+  LD   (#_AYREGS+AY_AmpB),A
+  LD   (#_AYREGS+AY_AmpC),A
   
   JP   _PlayAY                ;ROUT_A0
   
@@ -459,17 +459,17 @@ __asm
 
 
 ;control of I/O bits of register 7
-  ld   A,(#_AYREGS+AR_Mixer)
+  ld   A,(#_AYREGS+AY_Mixer)
   AND  #0b00111111
   ld   B,A
       
-  ld   A,#AR_Mixer
+  ld   A,#AY_Mixer
   out  (#AY0index),A
   in   A,(#AY0read)  
   and  #0b11000000	; Mask to catch two bits of joys 
   or   B		    ; I add the new mixer state collected from the buffer
   
-  ld   (#_AYREGS+AR_Mixer),A
+  ld   (#_AYREGS+AY_Mixer),A
    
   XOR  A
   
@@ -527,9 +527,9 @@ PT3_PLAY:
  
   XOR  A
   LD   (#_PT3_AddToEn),A
-  LD   (#_AYREGS+AR_Mixer),A
+  LD   (#_AYREGS+AY_Mixer),A
   DEC  A
-  LD   (#_AYREGS+AR_EnvTp),A
+  LD   (#_AYREGS+AY_EnvShape),A
   
   LD   HL,#_DelyCnt
   DEC  (HL)
@@ -610,26 +610,26 @@ PL1D:
 
 PL2:	
   LD   IX,#_ChanA
-  LD   HL,(#_AYREGS+AR_TonA)
+  LD   HL,(#_AYREGS+AY_ToneA)
   CALL CHREGS
-  LD   (#_AYREGS+AR_TonA),HL
-  LD   A,(#_AYREGS+AR_AmplC)
-  LD   (#_AYREGS+AR_AmplA),A
+  LD   (#_AYREGS+AY_ToneA),HL
+  LD   A,(#_AYREGS+AY_AmpC)
+  LD   (#_AYREGS+AY_AmpA),A
   LD   IX,#_ChanB
-  LD   HL,(#_AYREGS+AR_TonB)
+  LD   HL,(#_AYREGS+AY_ToneB)
   CALL CHREGS
-  LD   (#_AYREGS+AR_TonB),HL
-  LD   A,(#_AYREGS+AR_AmplC)
-  LD   (#_AYREGS+AR_AmplB),A
+  LD   (#_AYREGS+AY_ToneB),HL
+  LD   A,(#_AYREGS+AY_AmpC)
+  LD   (#_AYREGS+AY_AmpB),A
   LD   IX,#_ChanC
-  LD   HL,(#_AYREGS+AR_TonC)
+  LD   HL,(#_AYREGS+AY_ToneC)
   CALL CHREGS
-  LD   (#_AYREGS+AR_TonC),HL
+  LD   (#_AYREGS+AY_ToneC),HL
   
   LD   HL,(#_Ns_Base)    ;Ns_Base_AddToNs
   LD   A,H
   ADD  A,L
-  LD   (#_AYREGS+AR_Noise),A
+  LD   (#_AYREGS+AY_Noise),A
   
   ld   A,(#_PT3_AddToEn)
   LD   E,A
@@ -640,7 +640,7 @@ PL2:
   ADD  HL,DE
   LD   DE,(#_CurESld)
   ADD  HL,DE
-  LD  (#_AYREGS+AR_Env),HL
+  LD  (#_AYREGS+AY_EnvPeriod),HL
   
   XOR  A
   LD   HL,#_CurEDel
@@ -952,7 +952,7 @@ C_DELAY:
 	
 SETENV:	
   LD   -12+CHNPRM_Env_En(IX),E
-  LD   (#_AYREGS+AR_EnvTp),A
+  LD   (#_AYREGS+AY_EnvShape),A
   LD   A,(BC)
   INC  BC
   LD   H,A
@@ -1017,7 +1017,7 @@ SPCCOMS:
 
 CHREGS:	
   XOR  A
-  LD   (#_AYREGS+AR_AmplC),A
+  LD   (#_AYREGS+AY_AmpC),A
   BIT   0,CHNPRM_Flags(IX)
   PUSH  HL
   JP    Z,CH_EXIT
@@ -1158,7 +1158,7 @@ CH_ENV:
   JR   NZ,CH_NOEN
   OR   CHNPRM_Env_En(IX)
 CH_NOEN:	
-  LD   (#_AYREGS+AR_AmplC),A
+  LD   (#_AYREGS+AY_AmpC),A
   BIT  7,B
   LD   A,C
   JR   Z,NO_ENSL
@@ -1189,7 +1189,7 @@ CH_MIX:
   RRA
   AND  #0x48
 CH_EXIT:	
-  LD   HL,#_AYREGS+AR_Mixer
+  LD   HL,#_AYREGS+AY_Mixer
   OR   (HL)
   RRCA
   LD   (HL),A

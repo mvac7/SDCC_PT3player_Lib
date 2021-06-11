@@ -54,6 +54,17 @@ Vortex Tracker II v1.0 PT3 player (c) 2004 S.V.Bulba [(Vortex Project)](https://
 
 
 
+## Requirements
+
+* Small Device C Compiler (SDCC) v3.9 http://sdcc.sourceforge.net/
+* Hex2bin v2.5 http://hex2bin.sourceforge.net/ 
+* Vortex Tracker II > https://bulba.untergrund.net/vortex_e.htm (for create PT3 songs)
+* A software to dump a PT3 binary file in C format. [PT3toCdata mSXdevtools](https://github.com/mvac7/PT3toCdata) or Aoineko's [CMSXbin](https://github.com/aoineko-fr/CMSXbin)
+
+
+
+
+---
 ## Acknowledgments
   
 I want to give a special thanks to all those who freely share their knowledge with the MSX developer community.
@@ -81,15 +92,7 @@ I want to give a special thanks to all those who freely share their knowledge wi
 
 
 
-## Requirements
-
-* Small Device C Compiler (SDCC) v3.9 http://sdcc.sourceforge.net/
-* Hex2bin v2.5 http://hex2bin.sourceforge.net/ 
-* Vortex Tracker II > https://bulba.untergrund.net/vortex_e.htm (for create PT3 songs)
-* A software to dump a PT3 binary file in C format. [PT3toCdata mSXdevtools](https://github.com/mvac7/PT3toCdata) or Aoineko's [CMSXbin](https://github.com/aoineko-fr/CMSXbin)
-
-
-
+---
 ## Functions
 
 * **Player_Init()** Initialize the Player.
@@ -103,6 +106,26 @@ I want to give a special thanks to all those who freely share their knowledge wi
 
 
 
+---
+## Definitions
+
+### AY Registers
+
+Label | Value | Description
+-- | -- | -- 
+AY_ToneA     |  0 | Channel A Tone Period (12 bits)
+AY_ToneB     |  2 | Channel B Tone Period (12 bits)
+AY_ToneC     |  4 | Channel C Tone Period (12 bits)
+AY_Noise     |  6 | Noise Period (5 bits)
+AY_Mixer     |  7 | Mixer
+AY_AmpA      |  8 | Channel Volume A (4 bits + B5 active Envelope)
+AY_AmpB      |  9 | Channel Volume B (4 bits + B5 active Envelope)
+AY_AmpC      | 10 | Channel Volume C (4 bits + B5 active Envelope)
+AY_EnvPeriod | 11 | Envelope Period (12 bits)
+AY_EnvShape  | 13 | Envelope Shape
+
+
+---
 ## How to use
 
 Follow the next steps:

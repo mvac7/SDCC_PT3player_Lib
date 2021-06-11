@@ -92,18 +92,21 @@ mvac7 version:
 #define CHNPRM_Size   29 //RESB 1
 // endstruc
 
-//- struc AR -
-#define AR_TonA  0	//RESW 1
-#define AR_TonB  2	//RESW 1
-#define AR_TonC  4	//RESW 1
-#define AR_Noise 6	//RESB 1
-#define AR_Mixer 7	//RESB 1
-#define AR_AmplA 8	//RESB 1
-#define AR_AmplB 9	//RESB 1
-#define AR_AmplC 10	//RESB 1
-#define AR_Env   11	//RESW 1
-#define AR_EnvTp 13	//RESB 1
-//endstruc
+
+
+#ifndef AY_REGISTERS
+#define AY_REGISTERS
+#define AY_ToneA      0 //Channel A Tone Period (12 bits)
+#define AY_ToneB      2 //Channel B Tone Period (12 bits)
+#define AY_ToneC      4 //Channel C Tone Period (12 bits)
+#define AY_Noise      6 //Noise Period (5 bits)
+#define AY_Mixer      7 //Mixer
+#define AY_AmpA       8 //Channel Volume A (4 bits + B5 active Envelope)
+#define AY_AmpB       9 //Channel Volume B (4 bits + B5 active Envelope)
+#define AY_AmpC      10 //Channel Volume C (4 bits + B5 active Envelope)
+#define AY_EnvPeriod 11 //Envelope Period (12 bits)
+#define AY_EnvShape  13 //Envelope Shape
+#endif
 
 
 #define Loop_OFF 0
