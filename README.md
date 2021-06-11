@@ -33,6 +33,9 @@ In examples/test_ROM software, PT3 songs:
 
 Adaptation of the latest version of Vortex Tracker II PT3 Player for MSX (SapphiRe) for use in software development in C (SDCC).
 
+There are modifications on the original code, to add some extra functionality in the player control. 
+Also part of the nomenclature has been changed to unify and simplify the use of different sound libraries.
+
 Allows access to player variables.
 
 Allows you to use any of the four note/frequency tables available in Vortex Tracker. 
@@ -74,7 +77,7 @@ I want to give a special thanks to all those who freely share their knowledge wi
 * MSXKun/Paxanga soft > [(WEB)](http://paxangasoft.retroinvaders.com/)
 * Sapphire/Z80ST > [(WEB)](http://z80st.auic.es/)
 * Makinavaja for his music. [(SoundCloud)](https://soundcloud.com/makimsx)
-* Aoineko [(GitHub)](https://github.com/aoineko-fr)
+* Aoineko > [(GitHub)](https://github.com/aoineko-fr)
 * Avelino Herrera > [(WEB)](http://msx.atlantes.org/index_es.html)
 * Nerlaska > [(Blog)](http://albertodehoyonebot.blogspot.com.es)
 * Marq/Lieves!Tuore > [(Marq)](http://www.kameli.net/marq/) [(Lieves!Tuore)](http://www.kameli.net/lt/)
@@ -85,7 +88,7 @@ I want to give a special thanks to all those who freely share their knowledge wi
 * MSX Assembly Page > [(WEB)](http://map.grauw.nl/resources/msxbios.php)
 * Portar MSX Tech Doc > [(WEB)](https://problemkaputt.de/portar.htm)
 * MSX Resource Center > [(WEB)](http://www.msx.org/)
-* Karoshi MSX Community (RIP 2007-2020)
+* Karoshi MSX Community > [(WEB)](http://karoshi.auic.es/)
 * BlueMSX emulator >> [(WEB)](http://www.bluemsx.com/)
 * OpenMSX emulator >> [(WEB)](http://openmsx.sourceforge.net/)
 * Meisei emulator >> ?
@@ -102,7 +105,7 @@ I want to give a special thanks to all those who freely share their knowledge wi
 * **Player_Loop(char loop)** Change state of loop `(0=off ; 1=on)`
 * **Player_Pause()** Pause song playback.
 * **Player_Resume()** Resume song playback.
-* **char Player_IsEnd()** Indicates whether the song has finished playing. `(0 = No, 1 = Yes)`
+* **char Player_IsEnd()** Indicates whether the song has finished playing. `(0 = No, 1 = Yes)`. It's only useful if you're playing a song with the loop turned off.
 
 
 
@@ -132,13 +135,20 @@ Follow the next steps:
 
 1) Create a song in PT3 format with the Vortex Tracker.
 2) Dump the file into C code, in a constant array of char and save it as a header (.h).
-3) Include the header with the song data in your main source. 
+3) Include the header with the song data in your main source. Example: `#include "../include/PT3player_NoteTable2.h"`
 4) Initialize the player by executing `Player_Init()` and assign the frequency table `NoteTable = (unsigned int) NT;` 
 5) Initialize the song to play with `Player_InitSong(songADDR,loop)`
 6) At each VBLANK interrupt, execute `PlayAY()`. This function dumps the AY record values and makes it sound.
 7) Execute `Player_Decode()` in your code in each frame, to process the song data.
-8) You can stop song playback by executing `Player_Pause()` and resume with `Player_Resume()`
+8) You can control song playback using the **Player_Pause**, **Player_Resume**, **Player_Loop**, and **Player_IsEnd** functions.
 9) To play another song, repeat these steps starting with number 5.
+
+
+The player is based on a decoder that collects the data of a song step (frame) and translates it into data from the AY-3-8910 that writes in the `AYREGS` buffer. 
+These data should be transferred to PSG, at the beginning of the VBLANK interruption through the `PlayAY()` function.
+
+We will have control of the final sound if between the `Player_Decode()` and `PlayAY()` we modify the buffer. 
+In this way we can mute channels, generate fades or launch sound effects on the song that is playing.
 
 
 ### Example code
