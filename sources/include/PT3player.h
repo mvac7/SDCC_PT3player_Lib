@@ -104,7 +104,7 @@ mvac7 version:
 #define AY_AmpA       8 //Channel Volume A (4 bits + B5 active Envelope)
 #define AY_AmpB       9 //Channel Volume B (4 bits + B5 active Envelope)
 #define AY_AmpC      10 //Channel Volume C (4 bits + B5 active Envelope)
-#define AY_EnvPeriod 11 //Envelope Period (12 bits)
+#define AY_EnvPeriod 11 //Envelope Period (16 bits)
 #define AY_EnvShape  13 //Envelope Shape
 #endif
 
