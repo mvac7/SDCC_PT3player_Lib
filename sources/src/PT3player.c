@@ -1,7 +1,7 @@
 /* =============================================================================
    SDCC Vortex Tracker II PT3 player for MSX
 
-   Version: 1.1.8 (16/04/2021)
+   Version: 1.1.9 (07/07/2021)
    Architecture: MSX
    Format: C Object (SDCC .rel)
    Programming language: C and Z80 assembler
@@ -18,9 +18,12 @@
 
    Description:
      Adaptation of the Vortex Tracker II PT3 Player for MSX to be used in 
-     software development in C (SDCC). 
+     software development in C (SDCC).
+     
+     Requires the AY38910BF library  https://github.com/mvac7/SDCC_AY38910BF_Lib 
      
    History of versions:
+    - 1.1.9 (07/07/2021) Delete PlayAY() and AYREGS (need the AY38910BF) 
     - 1.1.8 (16/04/2021) add Player_IsEnd() function
     - 1.1.7 (24/03/2021)
     - 1.1.6 (15/02/2021) same function names in music libraries 
@@ -56,19 +59,46 @@ mvac7 version:
 
 ============================================================================= */
 
-
+#include "../include/AY38910BF.h"
 #include "../include/PT3player.h"
 
 
-//Internal AY
-#define AY0index 0xA0
-#define AY0write 0xA1
-#define AY0read  0xA2
+//ChannelsVars
+//struc	CHNPRM
+//reset group
+#define CHNPRM_PsInOr 0	 //RESB 1
+#define CHNPRM_PsInSm 1	 //RESB 1
+#define CHNPRM_CrAmSl 2	 //RESB 1
+#define CHNPRM_CrNsSl 3	 //RESB 1
+#define CHNPRM_CrEnSl 4	 //RESB 1
+#define CHNPRM_TSlCnt 5	 //RESB 1
+#define CHNPRM_CrTnSl 6	 //RESW 1
+#define CHNPRM_TnAcc  8	 //RESW 1
+#define CHNPRM_COnOff 10 //RESB 1
+//reset group
 
-//External AY
-/*#define AY0index 0x10
-#define AY0write 0x11
-#define AY0read  0x12*/
+#define CHNPRM_OnOffD 11 //RESB 1
+
+//IX for PTDECOD here (+12)
+#define CHNPRM_OffOnD 12 //RESB 1
+#define CHNPRM_OrnPtr 13 //RESW 1
+#define CHNPRM_SamPtr 15 //RESW 1
+#define CHNPRM_NNtSkp 17 //RESB 1
+#define CHNPRM_Note   18 //RESB 1
+#define CHNPRM_SlToNt 19 //RESB 1
+#define CHNPRM_Env_En 20 //RESB 1
+#define CHNPRM_Flags  21 //RESB 1
+
+//Enabled - 0,SimpleGliss - 2
+#define CHNPRM_TnSlDl 22 //RESB 1
+#define CHNPRM_TSlStp 23 //RESW 1
+#define CHNPRM_TnDelt 25 //RESW 1
+#define CHNPRM_NtSkCn 27 //RESB 1
+#define CHNPRM_Volume 28 //RESB 1
+#define CHNPRM_Size   29 //RESB 1
+// endstruc
+
+
 
 
 //VARS:
@@ -85,12 +115,11 @@ char CurEDel;
 char Ns_Base;		
 char AddToNs;		
 
-
 //AYREGS::
-//char VT_[14];
-char AYREGS[14];
+//char AYREGS[14];  //VT_[14];
 unsigned int EnvBase;
-char VAR0END[240];
+char VTABLE[240];   //VAR0END
+
 
 
 
@@ -101,9 +130,11 @@ Switches: 1=ON; 0=OFF
 - BIT 2 = ?
 - BIT 3 = ?
 - BIT 4 = LOOP ON/OFF
-- BIT 7 = is END? YES/NO           OLD: set each time, when loop point is passed 
+- BIT 5 = ?
+- BIT 6 = ? 
+- BIT 7 = is END? 0=No, 1=Yes 
 */
-char PT3state;  //before called PT3_SETUP
+char PT3_state;  //before called PT3_SETUP
 
 /* --- Workarea --- (apunta a RAM que estaba antes en codigo automodificable)
  -El byte de estado en SETUP deberia ser algo asi (CH enable/disable no esta aun)
@@ -169,7 +200,7 @@ __asm
   ld   HL,#0x11
   ld   D,H
   ld   E,H
-  ld   IX,#_VAR0END  ;_VT_+16
+  ld   IX,#_VTABLE  ;_VT_+16
   ld   B,#15
 INITV1:	
   push HL
@@ -196,16 +227,18 @@ INITV3:
   ld   B,C
   djnz INITV1
 
-
-CLEAR_REGS: 
-  xor  A  
-  ld   (#_PT3state),A
   
-  LD   HL,#_AYREGS
-  LD   DE,#_AYREGS+1
-  LD   BC,#13
-  LD   (HL),A
-  LDIR  
+; Clear AY registers: 
+  xor  A  
+  ld   (#_PT3_state),A
+
+  call _AY_Init   ;can be found in the AY38910BF library
+  
+;  LD   HL,#_AYREGS
+;  LD   DE,#_AYREGS+1
+;  LD   BC,#13
+;  LD   (HL),A
+;  LDIR  
   
   pop  IX
   ret
@@ -224,7 +257,7 @@ __endasm;
 void Player_Pause() __naked
 {
 __asm
-  LD   HL,#_PT3state       
+  LD   HL,#_PT3_state       
   RES  1,(HL)
    
 MUTE:	
@@ -233,7 +266,8 @@ MUTE:
   LD   (#_AYREGS+AY_AmpB),A
   LD   (#_AYREGS+AY_AmpC),A
   
-  JP   _PlayAY                ;ROUT_A0
+  //JP   _PlayAY                ;ROUT_A0
+  ret
   
 __endasm;
 }
@@ -250,7 +284,7 @@ __endasm;
 void Player_Resume() __naked
 {
 __asm
-   LD      HL,#_PT3state       
+   LD      HL,#_PT3_state       
    SET     1,(HL)      ;PLAYER ON
    
    ret
@@ -271,7 +305,7 @@ char Player_IsEnd() __naked
 __asm
     xor  A
     
-    LD   HL,#_PT3state
+    LD   HL,#_PT3_state
     BIT  7,(HL)
     jr   Z,retPlayerEndState
     ld   A,#1
@@ -300,7 +334,7 @@ __asm
   ld   IX,#0
   add  IX,SP
     
-  ld   HL,#_PT3state
+  ld   HL,#_PT3_state
   
   ld   A,4(IX)
   
@@ -341,7 +375,7 @@ __asm
   add  IX,SP
 
   xor  A
-  ld   HL,#_PT3state
+  ld   HL,#_PT3_state
   ld   (HL),A
   
   SET  1,(HL)      ;PLAYER ON  
@@ -405,7 +439,7 @@ playerINIT:
   ADD  HL,DE
   LD   (#_PT3_SAMPTRS),HL
   
-  ;LD   HL,#_PT3state
+  ;LD   HL,#_PT3_state
   ;RES  7,(HL)
   
   
@@ -414,7 +448,7 @@ playerINIT:
   LD   HL,#_ChanA     ;VARS
   LD   (HL),A
   LD   DE,#_ChanA+1   ;VARS+1
-  LD   BC,#_VAR0END - _ChanA -1    ;_AYREGS - _ChanA -1
+  LD   BC,#_VTABLE - _ChanA -1    ;_AYREGS - _ChanA -1
   LDIR
     
   INC  A
@@ -440,65 +474,6 @@ __endasm;
 }
 // ----------------------------------------------------------------------------- END playerINIT
 
-  
-
-
-
-
-/* -----------------------------------------------------------------------------
- PlayAY
- Description: Play Song. 
-              Send data form AYREGS buffer to AY registers
-              Execute on each interruption of VBLANK
- Input:       -
- Output:      -
------------------------------------------------------------------------------ */
-void PlayAY() __naked
-{
-__asm  
-
-
-;control of I/O bits of register 7
-  ld   A,(#_AYREGS+AY_Mixer)
-  AND  #0b00111111
-  ld   B,A
-      
-  ld   A,#AY_Mixer
-  out  (#AY0index),A
-  in   A,(#AY0read)  
-  and  #0b11000000	; Mask to catch two bits of joys 
-  or   B		    ; I add the new mixer state collected from the buffer
-  
-  ld   (#_AYREGS+AY_Mixer),A
-   
-  XOR  A
-  
-  ld   B,#13
-  ld   C,#AY0index +1
-  ld   HL,#_AYREGS  
-AYloop:
-  DEC  C
-  OUT  (C),A      ;select AY reg
-  INC  C          ;
-  INC  A          ;next AY reg
-  OUTI            ;write value in AY reg / outi = out(C),(HL) / inc HL / dec B
-  JR   NZ,AYloop  ;next
-  
-;Envelope shape (reg 13)
-  DEC  C          
-  OUT  (C),A      
-  LD   A,(HL)     
-  AND  A          
-  RET  M
-  
-  INC  C
-  OUT  (C),A  ; write enevelope shape value
-  
-  RET
-  
-__endasm;
-}
-// ----------------------------------------------------------------------------- END PT3PlayAY
 
 
 
@@ -521,7 +496,7 @@ __asm
   ret
 
 PT3_PLAY:  
-  LD   HL,#_PT3state       ;PLAY BIT 1 ON?
+  LD   HL,#_PT3_state       ;PLAY BIT 1 ON?
   BIT  1,(HL)
   RET  Z
  
@@ -529,7 +504,7 @@ PT3_PLAY:
   LD   (#_PT3_AddToEn),A
   LD   (#_AYREGS+AY_Mixer),A
   DEC  A
-  LD   (#_AYREGS+AY_EnvShape),A
+  LD   (#_AYREGS+AY_EnvShape),A ;255 change in PlayAY()
   
   LD   HL,#_DelyCnt
   DEC  (HL)
@@ -539,7 +514,7 @@ PT3_PLAY:
   DEC  (HL)
   JR   NZ,PL1B
   
-  ld	 BC,(#_PT3_AdInPtA)
+  ld   BC,(#_PT3_AdInPtA)
   LD   A,(BC)
   AND  A
   JR   NZ,PL1A
@@ -661,7 +636,7 @@ PL2:
   RET
 
 IFSTOP:  
-  LD   HL,#_PT3state
+  LD   HL,#_PT3_state
   BIT  1,(HL)   ; pause mode
   JP   Z,MUTE
   
@@ -670,13 +645,13 @@ IFSTOP:
 
 ;CHECKLP
 CHECK_LOOP:	
-  LD   HL,#_PT3state
-  ;SET  7,(HL)   ;loop control
+  LD   HL,#_PT3_state
+  ;SET  7,(HL)  ;loop control
   BIT  4,(HL)   ;loop bit 
   RET  NZ
   
 ;=0 - No loop
-  RES  1,(HL) ;set pause mode
+  RES  1,(HL)   ;set pause mode
   SET  7,(HL)   ;END song
   
 ;  POP  HL
@@ -1150,7 +1125,7 @@ CH_VOL:
   OR   CHNPRM_Volume(IX)
   LD   L,A
   LD   H,#0
-  LD   DE,#_AYREGS  ;_VT_
+  LD   DE,#_VTABLE-16    ;_AYREGS (searches the position of the volume table from a specific position in RAM) 
   ADD  HL,DE
   LD   A,(HL)
 CH_ENV:	
@@ -1174,7 +1149,7 @@ CH_NOEN:
 NO_ENAC:	
   ld	 HL,#_PT3_AddToEn 
   ADD  A,(HL) ;BUG IN PT3 - NEED WORD HERE.
-  	   ;FIX IT IN NEXT VERSION?
+  	          ;FIX IT IN NEXT VERSION?
   LD   (HL),A
   JR   CH_MIX
 NO_ENSL: 
