@@ -83,36 +83,6 @@ Vortex Tracker II v1.0 PT3 player (c) 2004 S.V.Bulba [(Vortex Project)](https://
 
 
 
----
-## Acknowledgments
-  
-I want to give a special thanks to all those who freely share their knowledge with the MSX developer community.
-
-* S.V.Bulba > [(WEB)](http://bulba.at.kz) 
-* Alfonso D. C. aka Dioniso
-* MSXKun/Paxanga soft > [(WEB)](http://paxangasoft.retroinvaders.com/)
-* Sapphire/Z80ST > [(WEB)](http://z80st.auic.es/)
-* Makinavaja for his music. [(SoundCloud)](https://soundcloud.com/makimsx)
-* Aoineko > [(GitHub)](https://github.com/aoineko-fr)
-* Avelino Herrera > [(WEB)](http://msx.avelinoherrera.com)
-* Nerlaska > [(Blog)](http://albertodehoyonebot.blogspot.com.es)
-* Marq/Lieves!Tuore > [(Marq)](http://www.kameli.net/marq/) [(Lieves!Tuore)](http://www.kameli.net/lt/)
-* Fubukimaru [(gitHub)](https://github.com/Fubukimaru)
-* Andrear > [(Blog)](http://andrear.altervista.org/home/msxsoftware.php)
-* Fernando García > [(Curso)](http://www.z80st.es/cursos/bitvision-assembler)
-* Ramones > [(MSXblog)](https://www.msxblog.es/tutoriales-de-programacion-en-ensamblador-ramones/) - [(MSXbanzai)](http://msxbanzai.tni.nl/dev/faq.html)
-* Eric Boez > [(gitHub)](https://github.com/ericb59)
-* MSX Assembly Page > [(WEB)](http://map.grauw.nl/resources/msxbios.php)
-* Portar MSX Tech Doc > [(WEB)](https://problemkaputt.de/portar.htm)
-* MSX Resource Center > [(WEB)](http://www.msx.org/)
-* Karoshi MSX Community > [(WEB)](http://karoshi.auic.es/)
-* BlueMSX emulator >> [(WEB)](http://www.bluemsx.com/)
-* OpenMSX emulator >> [(WEB)](http://openmsx.sourceforge.net/)
-* Meisei emulator >> ?
-
-
-
----
 ## Functions
 
 * **Player_Init()** Initialize the Player.
@@ -125,7 +95,6 @@ I want to give a special thanks to all those who freely share their knowledge wi
 
 
 
----
 ## Definitions
 
 ### AY Registers
@@ -145,6 +114,7 @@ AY_EnvShape  | 13 | Envelope Shape
 
 
 ---
+
 ## How to use
 
 Follow the next steps:
@@ -250,3 +220,32 @@ const char SONG00[]={
 0x3F,0x42,0x45,0x42,0x4B,0x0F,0x00,0x15,0x18,0x1B,0x1E,0x21,0x24,0x27,0x2A,0x2D,
 ...};
 ```
+
+
+---
+
+## Acknowledgments
+  
+I want to give a special thanks to all those who freely share their knowledge with the MSX developer community.
+
+* S.V.Bulba > [(WEB)](http://bulba.at.kz) 
+* Alfonso D. C. aka Dioniso
+* MSXKun/Paxanga soft > [(WEB)](http://paxangasoft.retroinvaders.com/)
+* Sapphire/Z80ST > [(WEB)](http://z80st.auic.es/)
+* Makinavaja for his music. [(SoundCloud)](https://soundcloud.com/makimsx)
+* Aoineko > [(GitHub)](https://github.com/aoineko-fr)
+* Avelino Herrera > [(WEB)](http://msx.avelinoherrera.com)
+* Nerlaska > [(Blog)](http://albertodehoyonebot.blogspot.com.es)
+* Marq/Lieves!Tuore > [(Marq)](http://www.kameli.net/marq/) [(Lieves!Tuore)](http://www.kameli.net/lt/)
+* Fubukimaru [(gitHub)](https://github.com/Fubukimaru)
+* Andrear > [(Blog)](http://andrear.altervista.org/home/msxsoftware.php)
+* Fernando García > [(Curso)](http://www.z80st.es/cursos/bitvision-assembler)
+* Ramones > [(MSXblog)](https://www.msxblog.es/tutoriales-de-programacion-en-ensamblador-ramones/) - [(MSXbanzai)](http://msxbanzai.tni.nl/dev/faq.html)
+* Eric Boez > [(gitHub)](https://github.com/ericb59)
+* MSX Assembly Page > [(WEB)](http://map.grauw.nl/resources/msxbios.php)
+* Portar MSX Tech Doc > [(WEB)](https://problemkaputt.de/portar.htm)
+* MSX Resource Center > [Wiki](https://www.msx.org/wiki/)
+* Karoshi MSX Community > [(WEB)](http://karoshi.auic.es/)
+* BlueMSX emulator >> [(WEB)](http://www.bluemsx.com/)
+* OpenMSX emulator >> [(WEB)](http://openmsx.sourceforge.net/)
+* Meisei emulator >> ?
