@@ -63,9 +63,10 @@ You can access the documentation here with [`How to use the library`](docs/HOWTO
 
 In the source code `\examples`, you can find applications for testing and learning purposes.
 
-![TEST PT3player](https://raw.githubusercontent.com/mvac7/SDCC_PT3player/master/examples/test_ROM/GFX/TESTPT3.png)
+![TEST PT3player](https://github.com/mvac7/SDCC_PT3player/raw/master/examples/test01_MSXROM/GFX/TESTPT3.png)
 
-[`TEST PT3player in WebMSX`](https://webmsx.org/?ROM=https://github.com/mvac7/SDCC_PT3player/raw/master/examples/test01_ROM/bin/TESTPT3.ROM)
+[`TEST PT3player in WebMSX`](https://webmsx.org/?ROM=https://github.com/mvac7/SDCC_PT3player/raw/master/examples/test01_MSXROM/bin/TESTPT3.ROM)
+                                                     
 
 This library is part of the [MSX fR3eL Project](https://github.com/mvac7/SDCC_MSX_fR3eL).
 
