@@ -1,7 +1,7 @@
 /* =============================================================================
    SDCC Vortex Tracker II PT3 player for MSX
 
-   Version: 1.1.9 (07/07/2021)
+   Version: 1.1.10 (05/10/2021)
    Architecture: MSX
    Format: C Object (SDCC .rel)
    Programming language: C and Z80 assembler
@@ -85,6 +85,17 @@ Switches: 1=ON; 0=OFF
 */
 extern char PT3_state; //before called PT3_SETUP
 
+//#define Bit0 1      //(0)
+#define PT3_PLAY   2  //(1) ON/OFF
+//#define Bit2 4
+//#define Bit3 8
+#define PT3_LOOP  16  //(4) ON/OFF
+//#define Bit5 32
+//#define Bit6 64
+#define PT3_END  128   //(7) is END? YES/NO
+
+//example: if (PT3_state & PT3_PLAY) Player_Decode();
+
 
 
 extern unsigned int PT3_MODADDR;  //direccion datos canción
@@ -113,7 +124,7 @@ extern unsigned int PT3_ESldAdd;  //Envelope data (idem)
 
 
 
-extern unsigned int NoteTable;   //note table memory address
+//extern unsigned int NoteTable;   //note table memory address
 //extern char NoteTable[192];       //Note table
 
 
@@ -131,8 +142,8 @@ void Player_Init();
 
 /* =============================================================================
  Player_Loop
- Description: Change state of loop
- Input:       - 0=off ; 1=on  (false = 0, true = 1)
+ Description: Change loop state
+ Input:       - (char or SWITCHER definition) 0=OFF ; 1=ON
  Output:      -
 ============================================================================= */
 void Player_Loop(char loop); 
@@ -163,11 +174,13 @@ void Player_Resume();
  Player_InitSong
  Description: Initialize song
  Input: (unsigned int) Song data address. 
-                       Subtract 100 if you delete the header of the PT3 file.
+                       If the PT3 binary contains the header it will require 
+                       subtracting 100 from this value.
+        (unsigned int) Note Table address.
         (char) Loop - 0=off ; 1=on  (false = 0, true = 1));
  Output:      -
 ----------------------------------------------------------------------------- */
-void Player_InitSong(unsigned int songADDR, char loop);
+void Player_InitSong(unsigned int songADDR, unsigned int notetableADDR, char loop);
 
 
 

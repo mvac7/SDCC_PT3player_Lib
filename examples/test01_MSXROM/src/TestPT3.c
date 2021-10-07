@@ -1,6 +1,6 @@
 /* =============================================================================
   Test PT3 player Library for SDCC
-  Version: 2.0 (12/07/2021)
+  Version: 2.1 (7/10/2021)
   Author: (test program) mvac7 <mvac7303b@gmail.com>
   Architecture: MSX
   Format: ROM 16K
@@ -13,18 +13,19 @@
   Description:
     Application to test the functioning of the PT3player library.
     
-  History of versions:
-    - 2.0 (12/07/2021) New GUI + test extern AY
-    - 1.9 (07/07/2021) Update interruptM1_Hooks and AY38910BF Libraries 
-    - 1.8 (08/06/2021) Bug #21 correction - First song fails 
-    - 1.7 (16/04/2021) SC1 Tileset + Test Player_IsEnd() + show PT3_state
-    - 1.6 (15/02/2021) Adaptation to PT3_Player v1.1.6 (function names)
-    - 1.5 (28/01/2021) support for multiple songs
-    - 1.4 (07/01/2021)
-    - 1.3 (06/01/2021) Test PT3_Loop
-    - 1.2 (05/01/2021) Updates related to v1.3 of the PT3player Lib
-    - 1.1 (04/01/2021) assigning the frequency table to NoteTable
-    - 1.0 (28/5/2019)
+History of versions:
+- v2.1 (07/10/2021) Updates from v1.1.10 PT3player Lib
+- v2.0 (12/07/2021) New GUI + test extern AY
+- v1.9 (07/07/2021) Update interruptM1_Hooks and AY38910BF Libraries 
+- v1.8 (08/06/2021) Bug #21 correction - First song fails 
+- v1.7 (16/04/2021) SC1 Tileset + Test Player_IsEnd() + show PT3_state
+- v1.6 (15/02/2021) Adaptation to PT3_Player v1.1.6 (function names)
+- v1.5 (28/01/2021) support for multiple songs
+- v1.4 (07/01/2021)
+- v1.3 (06/01/2021) Test PT3_Loop
+- v1.2 (05/01/2021) Updates related to v1.3 of the PT3player Lib
+- v1.1 (04/01/2021) assigning the frequency table to NoteTable
+- v1.0 (28/5/2019)
 ============================================================================= */
 
 #include "../include/newTypes.h"
@@ -83,7 +84,7 @@ void ShowENDsong();
 
 // constants  ------------------------------------------------------------------
 const char text01[] = "Test PT3player Library";
-const char text02[] = "v2.0 (12/07/2021)";
+const char text02[] = "v2.1 (7/10/2021)";
 
 const char presskey[] = "Press a key to Play";
 
@@ -97,7 +98,6 @@ char VALUE;
 
 char SPRBUFFER[VUMETERSPRBUFF];
 
-
 boolean Row6pressed;
 boolean Row7pressed;
 
@@ -109,6 +109,8 @@ uint songPT3Data[2];
 
 char _loop;
 
+char _currentSong;
+     
 
 // Functions -------------------------------------------------------------------
 
@@ -116,12 +118,13 @@ char _loop;
 
 void main(void)
 {
-  char keyPressed;
-  
+  char keyPressed;  
   char result;
     
-  uint conta = 0;
+  uint conta=0;
   uint songStep;
+  
+  _currentSong=0;
   
   Row6pressed=false;
   Row7pressed=false;
@@ -134,7 +137,6 @@ void main(void)
   songPT3Data[1] = (unsigned int) SONG01;
   
   // Initialize the Player
-  NoteTable = (unsigned int) NT;
   Player_Init();
   //AY_Init();
   //
@@ -174,13 +176,23 @@ void main(void)
   {
     HALT;      
     
-    if (PT3_state & Bit1)
+    if (PT3_state & PT3_PLAY)
     {
         songStep=PT3_CrPsPtr - firstPATaddr;
         VPrintNumber(8,13,songStep,3);
-        //LOCATE(25,13);
-        //PrintFNumber(PEEKW(PT3_LPosPtr),32,5);
+        // -------------------------------------- test vars
+        //VPrintNumber(14,13,PEEK(77,25),5); //num of pattern?        
+        // -------------------------------------- END test vars
     }
+    
+/*    else{        
+        if (Player_IsEnd() && _loop==OFF)
+        {
+            _currentSong++;
+            if(_currentSong>1) _currentSong=0; 
+            PlaySong(_currentSong);            
+        }   
+    }*/
 
     ShowVumeter(0,AYREGS[AY_AmpA]);
     ShowVumeter(1,AYREGS[AY_AmpB]);
@@ -282,11 +294,11 @@ void SwapLoop()
 
 void PlaySong(char songNumber)
 {
-  //DI;
-  
   Player_Pause();
+  
+  _currentSong=songNumber;
       
-  Player_InitSong(songPT3Data[songNumber], _loop);  // (unsigned int) Song data address ; (char) Loop - 0=off ; 1=on
+  Player_InitSong(songPT3Data[songNumber], (unsigned int) NT2, _loop);
   
   firstPATaddr = PT3_CrPsPtr;
   
@@ -296,19 +308,8 @@ void PlaySong(char songNumber)
   VPRINTN(8,11,(char*) songNames[songNumber],23);
   
   VPRINT(8,12,"                       ");
-  VPRINTN(8,12,(char*) songAuthors[songNumber],23);
-  
-  //EI;
+  VPRINTN(8,12,(char*) songAuthors[songNumber],23);  
 }
-
-
-
-/*void PrintF(char* text, char length)
-{ 
-  while(*(text) && length-->0)  bchput(*(text++));
-}*/
-
-
 
 
 void ShowPlayback()

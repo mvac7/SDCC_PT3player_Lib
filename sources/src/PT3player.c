@@ -1,7 +1,7 @@
 /* =============================================================================
    SDCC Vortex Tracker II PT3 player for MSX
 
-   Version: 1.1.9 (07/07/2021)
+   Version: 1.1.10 (05/10/2021)
    Architecture: MSX
    Format: C Object (SDCC .rel)
    Programming language: C and Z80 assembler
@@ -23,6 +23,7 @@
      Requires the AY38910BF library  https://github.com/mvac7/SDCC_AY38910BF_Lib 
      
    History of versions:
+    - 1.1.10 (05/10/2021) note table in Player_InitSong and Bug in Player_Resume
     - 1.1.9 (07/07/2021) Delete PlayAY() and AYREGS (need the AY38910BF) 
     - 1.1.8 (16/04/2021) add Player_IsEnd() function
     - 1.1.7 (24/03/2021)
@@ -284,8 +285,10 @@ __endasm;
 void Player_Resume() __naked
 {
 __asm
-   LD      HL,#_PT3_state       
-   SET     1,(HL)      ;PLAYER ON
+   LD   HL,#_PT3_state
+   BIT  7,(HL)      ;if the song is finished it does not activate the player
+   ret  NZ       
+   SET  1,(HL)      ;PLAYER ON
    
    ret
 __endasm;
@@ -303,15 +306,16 @@ __endasm;
 char Player_IsEnd() __naked
 {
 __asm
-    xor  A
-    
     LD   HL,#_PT3_state
     BIT  7,(HL)
-    jr   Z,retPlayerEndState
-    ld   A,#1
+    jr   Z,notFinished
     
-retPlayerEndState:    
-    ld   L,A
+    ;Yes
+    ld   L,#1
+    ret
+    
+notFinished:    
+    ld   L,#0
     ret  
 __endasm;
 }
@@ -322,8 +326,8 @@ __endasm;
 
 /* =============================================================================
  Player_Loop
- Description: Change state of loop
- Input:       - 0=off ; 1=on  (false = 0, true = 1)
+ Description: Change loop state
+ Input:       - (char or SWITCHER definition) 0=OFF ; 1=ON
  Output:      -
 ============================================================================= */
 void Player_Loop(char loop) __naked
@@ -361,26 +365,34 @@ __endasm;
  Player_InitSong
  Description: Initialize song
  Input: (unsigned int) Song data address. 
-                       Subtract 100 if you delete the header of the PT3 file.
+                       If the PT3 binary contains the header it will require 
+                       subtracting 100 from this value.
+        (unsigned int) Note Table address.
         (char) Loop - 0=off ; 1=on  (false = 0, true = 1));
  Output:      -
 ----------------------------------------------------------------------------- */
-void Player_InitSong(unsigned int songADDR, char loop) __naked
+void Player_InitSong(unsigned int songADDR, unsigned int notetableADDR, char loop) __naked
 {
-songADDR;loop;
+songADDR;
+notetableADDR;
+loop;
 __asm
 
   push IX
   ld   IX,#0
   add  IX,SP
 
+  ld   L,6(IX)
+  ld   H,7(IX)
+  ld   (#_NoteTable),HL 
+  
   xor  A
   ld   HL,#_PT3_state
   ld   (HL),A
   
   SET  1,(HL)      ;PLAYER ON  
   
-  ld   A,6(IX)
+  ld   A,8(IX)
   or   A
   jr   NZ,SongLoop
   res  4,(HL)  ;not loop
@@ -490,12 +502,12 @@ void Player_Decode() __naked
 __asm   
   push IX
   
-  call PT3_PLAY
+  call _PT3_PLAY
   
   pop  IX
   ret
 
-PT3_PLAY:  
+_PT3_PLAY:  
   LD   HL,#_PT3_state       ;PLAY BIT 1 ON?
   BIT  1,(HL)
   RET  Z
