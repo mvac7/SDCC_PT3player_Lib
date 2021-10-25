@@ -52,21 +52,23 @@ You also get the possibility of selecting to which sound processor the data proc
 
 The AY38910BF together with the PT3player are designed to work together with the ayFXplayer so you will have a system to provide music and effects in the development of video games.
 
-![AY Sound System](https://raw.githubusercontent.com/mvac7/SDCC_AY38910BF_Lib/master/doc/AYlibs.png)
+![AY Sound System](https://raw.githubusercontent.com/mvac7/SDCC_AY38910BF_Lib/main/docs/AYlibs.png)
 
 Allows access to player variables.
 
 Allows you to use any of the four note/frequency tables available in Vortex Tracker. 
 They are available in header format to be included in your program.
 
+This project is an Open Source library. 
+You can add part or all of this code in your application development or include it in other libraries/engines.
+
 You can access the documentation here with [`How to use the library`](docs/HOWTO.md).  
 
-In the source code `\examples`, you can find applications for testing and learning purposes.
+In the source code [`examples/`](examples/), you can find applications for testing and learning purposes.
 
 ![TEST PT3player](https://github.com/mvac7/SDCC_PT3player/raw/master/examples/test01_MSXROM/GFX/TESTPT3.png)
 
 [`TEST PT3player in WebMSX`](https://webmsx.org/?ROM=https://github.com/mvac7/SDCC_PT3player/raw/master/examples/test01_MSXROM/bin/TESTPT3.ROM)
-                                                     
 
 This library is part of the [MSX fR3eL Project](https://github.com/mvac7/SDCC_MSX_fR3eL).
 

@@ -11,22 +11,23 @@
 ## Index
 - [1 Description](#1-Description)
 - [2 Requirements](#2-Requirements)
-- [3 Definitions](#3-Definitions)
-   - [3.1 SWITCHER (type)](#31-SWITCHER-(type))
-   - [3.2 PT3 State Bits](#32-PT3-State-Bits)
-- [4 Variables](#4-Variables)
-   - [4.1 PT3_state](#41-PT3_state)
-   - [4.2 Other PT3player variables](#42-Other-PT3player-variables)
-- [5 Functions](#5-Functions)
-   - [5.1 Player_Init](#51-Player_Init)
-   - [5.2 Player_InitSong](#52-Player_InitSong)
-   - [5.3 Player_Decode](#53-Player_Decode)
-   - [5.4 Player_Loop](#54-Player_Loop)
-   - [5.5 Player_Pause](#55-Player_Pause)
-   - [5.6 Player_Resume](#56-Player_Resume)
-   - [5.7 Player_IsEnd](#57-Player_IsEnd)
-- [6 How to use](#6-How-to-use)
-- [7 How to convert PT3 binary file to C data](#7-How-to-convert-PT3-binary-file-to-C-data)
+- [3 AY Sound System](#3-AY-Sound-System)
+- [4 Definitions](#4-Definitions)
+   - [4.1 SWITCHER (type)](#41-SWITCHER-(type))
+   - [4.2 PT3 State Bits](#42-PT3-State-Bits)
+- [5 Variables](#5-Variables)
+   - [5.1 PT3_state](#51-PT3_state)
+   - [5.2 Other PT3player variables](#52-Other-PT3player-variables)
+- [6 Functions](#6-Functions)
+   - [6.1 Player_Init](#61-Player_Init)
+   - [6.2 Player_InitSong](#62-Player_InitSong)
+   - [6.3 Player_Decode](#63-Player_Decode)
+   - [6.4 Player_Loop](#64-Player_Loop)
+   - [6.5 Player_Pause](#65-Player_Pause)
+   - [6.6 Player_Resume](#66-Player_Resume)
+   - [6.7 Player_IsEnd](#67-Player_IsEnd)
+- [7 How to use](#7-How-to-use)
+- [8 How to convert PT3 binary file to C data](#8-How-to-convert-PT3-binary-file-to-C-data)
 
 
    
@@ -48,8 +49,6 @@ You also get the possibility of selecting to which sound processor the data proc
 
 The AY38910BF together with the PT3player are designed to work together with the ayFXplayer so you will have a system to provide music and effects in the development of video games.
 
-![AY Sound System](https://raw.githubusercontent.com/mvac7/SDCC_AY38910BF_Lib/master/doc/AYlibs.png)
-
 Allows access to player variables.
 
 Allows you to use any of the four note/frequency tables available in Vortex Tracker. 
@@ -62,7 +61,9 @@ This library is part of the [MSX fR3eL Project](https://github.com/mvac7/SDCC_MS
 Enjoy it!
 
 
+<br/>
 
+---
 
 ## 2 Requirements
 
@@ -72,12 +73,25 @@ Enjoy it!
 - A software to dump a PT3 binary file in C format. [PT3toCdata mSXdevtools](https://github.com/mvac7/PT3toCdata) or Aoineko's [CMSXbin](https://github.com/aoineko-fr/CMSXbin)
 - [PSG AY-3-8910 BF MSX SDCC Library](https://github.com/mvac7/SDCC_AY38910BF_Lib)
 
+<br/>
+
+---
+
+## 3 AY Sound System
+
+The [`AY38910BF`](https://github.com/mvac7/SDCC_AY38910BF_Lib), [`PT3player`](https://github.com/mvac7/SDCC_AY38910BF_Lib) and [`ayFXplayer`](https://github.com/mvac7/SDCC_ayFXplayer) libraries are designed to work together, so you will have a system to provide music and effects in game development.
+
+![AY Sound System](https://raw.githubusercontent.com/mvac7/SDCC_AY38910BF_Lib/master/docs/AYlibs.png)
+
+<br/>
+
+---
 
 
-## 3 Definitions
+## 4 Definitions
 
 
-### 3.1 SWITCHER (type)
+### 4.1 SWITCHER (type)
 
 Used to control the state of the loop.
 
@@ -87,7 +101,7 @@ OFF   | 0
 ON    | 1 
 
 
-### 3.2 PT3 State Bits
+### 4.2 PT3 State Bits
 
 They contain the position of the control bits found in the state variable [`PT3_state`](#41-PT3_state).
 
@@ -107,9 +121,9 @@ PT3_END  | Song ended? (0=No/1=Yes)
 
 
 
-## 4 Variables
+## 5 Variables
 
-### 4.1 PT3_state
+### 5.1 PT3_state
 
 Type: `char`
 
@@ -128,7 +142,7 @@ Bit7 | song ended? (0=No/1=Yes)
 
 
 
-### 4.2 Other PT3player variables
+### 5.2 Other PT3player variables
 
 Variables that the player uses to control the decoding of the sequence data.
 
@@ -157,9 +171,9 @@ PT3_ESldAdd  | unsigned int | ?
 
 
 
-## 5 Functions
+## 6 Functions
 
-### 5.1 Player_Init
+### 6.1 Player_Init
 
 <table>
 <tr><th colspan=3 align="left">Player_Init</th></tr>
@@ -171,7 +185,7 @@ PT3_ESldAdd  | unsigned int | ?
 </table>
 
 
-### 5.2 Player_InitSong
+### 6.2 Player_InitSong
 
 <table>
 <tr><th colspan=3 align="left">Player_InitSong</th></tr>
@@ -182,12 +196,12 @@ PT3_ESldAdd  | unsigned int | ?
 <tr><td>char</td><td>Loop (0=off ; 1=on)</td></tr>
 <tr><th>Output</th><td colspan=2> --- </td></tr>
 <tr><th>Examples:</th><td colspan=2>
-<code>Player_InitSong((unsigned int) SONG00, NT2, OFF);</code>
+<code>Player_InitSong((unsigned int) SONG00, (unsigned int) NT2, OFF);</code>
 </td></tr>
 </table>
 
 
-### 5.3 Player_Decode
+### 6.3 Player_Decode
 
 <table>
 <tr><th colspan=3 align="left">Player_Decode</th></tr>
@@ -199,7 +213,7 @@ PT3_ESldAdd  | unsigned int | ?
 </table>
 
 
-### 5.4 Player_Loop
+### 6.4 Player_Loop
 
 <table>
 <tr><th colspan=3 align="left">Player_Loop</th></tr>
@@ -213,7 +227,7 @@ PT3_ESldAdd  | unsigned int | ?
 </table>
 
 
-### 5.5 Player_Pause
+### 6.5 Player_Pause
 
 <table>
 <tr><th colspan=3 align="left">Player_Pause</th></tr>
@@ -225,7 +239,7 @@ PT3_ESldAdd  | unsigned int | ?
 </table>
 
 
-### 5.6 Player_Resume
+### 6.6 Player_Resume
 
 <table>
 <tr><th colspan=3 align="left">Player_Resume</th></tr>
@@ -237,7 +251,7 @@ PT3_ESldAdd  | unsigned int | ?
 </table>
 
 
-### 5.7 Player_IsEnd
+### 6.7 Player_IsEnd
 
 <table>
 <tr><th colspan=3 align="left">Player_IsEnd</th></tr>
@@ -251,7 +265,7 @@ PT3_ESldAdd  | unsigned int | ?
 
 ---
 
-## 6 How to use
+## 7 How to use
 
 Follow the next steps:
 
@@ -261,7 +275,7 @@ Follow the next steps:
 4) Includes the header with the song data. Example: `#include "../include/maki_CompoAY19v2_PT3.h"`
 5) Includes the header of the note table used in the song. Example: `#include "../include/PT3player_NoteTable2.h"`
 6) Initialize the player by executing `Player_Init()`
-7) Initialize the song to play with `Player_InitSong(SongDataADDR, NoteTable, LOOP)`
+7) Initialize the song to play with `Player_InitSong(SongDataADDR, NoteTableADDR, LOOP)`
 8) At each VBLANK interrupt, execute `PlayAY()`. This function dumps the AY registers values and makes it sound.
 9) Execute `Player_Decode()` in your code in each frame, to process the song data.
 10) You can control song playback using the **Player_Pause**, **Player_Resume**, **Player_Loop**, and **Player_IsEnd** functions.
@@ -294,7 +308,8 @@ void main(void)
 
     Player_Init();
     
-    Player_InitSong((unsigned int) SONG00, NT2, OFF);
+    Player_InitSong((unsigned int) SONG00, (unsigned int) NT2, OFF);
+    AY_TYPE=AY_INTERNAL;
     
     while(1)
     {
@@ -314,7 +329,7 @@ void main(void)
 
 
 
-## 7 How to convert PT3 binary file to C data
+## 8 How to convert PT3 binary file to C data
 
 To include the songs in your program you need to convert the PT3s files to C data and save them as a header (.h).
 To perform this task you will need an application that dumps the data from a binary file into C code.
@@ -354,3 +369,10 @@ const char SONG00[]={
 0x3F,0x42,0x45,0x42,0x4B,0x0F,0x00,0x15,0x18,0x1B,0x1E,0x21,0x24,0x27,0x2A,0x2D,
 ...};
 ```
+
+<br/>
+
+---
+
+![Creative Commons License](https://i.creativecommons.org/l/by-nc/4.0/88x31.png) 
+<br/>This document is licensed under a [Creative Commons Attribution-NonCommercial 4.0 International License](http://creativecommons.org/licenses/by-nc/4.0/).
