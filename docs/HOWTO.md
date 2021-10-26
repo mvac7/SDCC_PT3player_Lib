@@ -67,11 +67,19 @@ Enjoy it!
 
 ## 2 Requirements
 
-- Small Device C Compiler (SDCC) v4.1 > http://sdcc.sourceforge.net/
-- Hex2bin v2.5 http://hex2bin.sourceforge.net/
-- Vortex Tracker II > https://bulba.untergrund.net/vortex_e.htm (for create PT3 songs)
-- A software to dump a PT3 binary file in C format. [PT3toCdata mSXdevtools](https://github.com/mvac7/PT3toCdata) or Aoineko's [CMSXbin](https://github.com/aoineko-fr/CMSXbin)
+### For compile.
+- [Small Device C Compiler (SDCC) v4.1](http://sdcc.sourceforge.net/)
+- [Hex2bin v2.5](http://hex2bin.sourceforge.net/)
 - [PSG AY-3-8910 BF MSX SDCC Library](https://github.com/mvac7/SDCC_AY38910BF_Lib)
+
+### For create PT3 songs.
+- [Vortex Tracker II](https://bulba.untergrund.net/vortex_e.htm) by S.V. Bulba 
+- [Vortex Tracker 2.5](https://github.com/z00m128/vortextracker25) by Ivan Pirog
+
+### For generate C datas 
+- [PT3toCdata mSXdevtools](https://github.com/mvac7/PT3toCdata) 
+- Aoineko's [CMSXbin](https://github.com/aoineko-fr/CMSXbin)
+
 
 <br/>
 

@@ -50,10 +50,6 @@ To function it requires the AY38910BF library. The function that dumps the regis
 has been moved to this library because it is applicable to other music libraries (such as ayFXplayer).
 You also get the possibility of selecting to which sound processor the data processed by the players should be directed (internal or external AY).
 
-The AY38910BF together with the PT3player are designed to work together with the ayFXplayer so you will have a system to provide music and effects in the development of video games.
-
-![AY Sound System](https://raw.githubusercontent.com/mvac7/SDCC_AY38910BF_Lib/main/docs/AYlibs.png)
-
 Allows access to player variables.
 
 Allows you to use any of the four note/frequency tables available in Vortex Tracker. 
@@ -74,24 +70,46 @@ This library is part of the [MSX fR3eL Project](https://github.com/mvac7/SDCC_MS
 
 Enjoy it!
 
+<br/>
 
+---
 
 ## License
 
 Vortex Tracker II v1.0 PT3 player (c) 2004 S.V.Bulba [`Vortex Project`](https://bulba.untergrund.net/vortex_e.htm)
 
+<br/>
 
+---
 
 ## Requirements
 
-- Small Device C Compiler (SDCC) v4.1 > http://sdcc.sourceforge.net/
-- Hex2bin v2.5 http://hex2bin.sourceforge.net/
-- Vortex Tracker II > [`WEB`](https://bulba.untergrund.net/vortex_e.htm) (for create PT3 songs)
-- A software to dump a PT3 binary file in C format. [`PT3toCdata mSXdevtools`](https://github.com/mvac7/PT3toCdata) or Aoineko's [`CMSXbin`](https://github.com/aoineko-fr/CMSXbin)
-- PSG AY-3-8910 BF MSX SDCC [`Library`](https://github.com/mvac7/SDCC_AY38910BF_Lib)
+### For compile.
+- [Small Device C Compiler (SDCC) v4.1](http://sdcc.sourceforge.net/)
+- [Hex2bin v2.5](http://hex2bin.sourceforge.net/)
+- [PSG AY-3-8910 BF MSX SDCC Library](https://github.com/mvac7/SDCC_AY38910BF_Lib)
 
+### For create PT3 songs.
+- [Vortex Tracker II](https://bulba.untergrund.net/vortex_e.htm) by S.V. Bulba 
+- [Vortex Tracker 2.5](https://github.com/z00m128/vortextracker25) by Ivan Pirog
 
+### For generate C datas 
+- [PT3toCdata mSXdevtools](https://github.com/mvac7/PT3toCdata) 
+- Aoineko's [CMSXbin](https://github.com/aoineko-fr/CMSXbin)
 
+<br/>
+
+---
+
+## AY Sound System
+
+The [`AY38910BF`](https://github.com/mvac7/SDCC_AY38910BF_Lib), [`PT3player`](https://github.com/mvac7/SDCC_AY38910BF_Lib) and [`ayFXplayer`](https://github.com/mvac7/SDCC_ayFXplayer) libraries are designed to work together, so you will have a system to provide music and effects in game development.
+
+![AY Sound System](https://raw.githubusercontent.com/mvac7/SDCC_AY38910BF_Lib/master/docs/AYlibs.png)
+
+<br/>
+
+---
 
 ## Acknowledgments
   
