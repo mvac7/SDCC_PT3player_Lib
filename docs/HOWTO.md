@@ -416,7 +416,8 @@ void FadeOUT()
     
     for(i=0;i<160;i++)
     {
-        HALT;        
+        HALT;
+        PlayAY();   //<-- AY38910BF Library        
         time++;
         
         if(time>10)
