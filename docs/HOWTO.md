@@ -28,8 +28,8 @@
    - [6.7 Player_IsEnd](#67-Player_IsEnd)
 - [7 How to use](#7-How-to-use)
 - [8 How to convert PT3 binary file to C data](#8-How-to-convert-PT3-binary-file-to-C-data)
-
-
+- [9 Bonus Source Code](#9-Bonus-Source-Code)
+   - [9.1 Fade Out](#9-Fade-Out)
    
 <br/>
 
@@ -376,6 +376,65 @@ const char SONG00[]={
 0x00,0xA6,0x0B,0x00,0x00,0x03,0x06,0x03,0x06,0x09,0x0C,0x09,0x12,0x36,0x39,0x3C,
 0x3F,0x42,0x45,0x42,0x4B,0x0F,0x00,0x15,0x18,0x1B,0x1E,0x21,0x24,0x27,0x2A,0x2D,
 ...};
+```
+
+<br/>
+
+---
+
+
+
+
+
+
+
+## 9 Bonus Source Code
+
+### 9.1 Fade Out
+
+The amplitude fading effect can be useful for situations where we have to interrupt a song and we don't want it to be done abruptly.
+
+The system used by some players (such as PT3player or WYZplayer), based on a buffer, allows us to modify the records before sending it to PSG. We will use this feature to make our fade-out effect.
+
+```c
+void FadeOUT()
+{
+    char time=0;
+    char i;
+    char fadeout_ampA;
+    char fadeout_ampB;
+    char fadeout_ampC;
+    
+    fadeout_ampA = AYREGS[AR_AmplA];
+    if (fadeout_ampA>15) fadeout_ampA=15;
+    
+    fadeout_ampB = AYREGS[AR_AmplB];
+    if (fadeout_ampB>15) fadeout_ampB=15;
+    
+    fadeout_ampC = AYREGS[AR_AmplC];
+    if (fadeout_ampC>15) fadeout_ampC=15;    
+    
+    for(i=0;i<160;i++)
+    {
+        HALT;        
+        time++;
+        
+        if(time>10)
+        {
+            time=0;
+            if (fadeout_ampA>0) fadeout_ampA--;
+            if (fadeout_ampB>0) fadeout_ampB--;
+            if (fadeout_ampC>0) fadeout_ampC--;    
+        }
+    
+        Player_Decode();
+        AYREGS[AR_AmplA] = (AYREGS[AR_AmplA] * fadeout_ampA)/16;
+        AYREGS[AR_AmplB] = (AYREGS[AR_AmplB] * fadeout_ampB)/16;
+        AYREGS[AR_AmplC] = (AYREGS[AR_AmplC] * fadeout_ampC)/16;
+    } 
+    
+}
+
 ```
 
 <br/>

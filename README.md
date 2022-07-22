@@ -107,34 +107,4 @@ The [`AY38910BF`](https://github.com/mvac7/SDCC_AY38910BF_Lib), [`PT3player`](ht
 
 ![AY Sound System](https://raw.githubusercontent.com/mvac7/SDCC_AY38910BF_Lib/master/docs/AYlibs.png)
 
-<br/>
 
----
-
-## Acknowledgments
-  
-I want to give a special thanks to all those who freely share their knowledge with the MSX developer community.
-
-- S.V.Bulba > [`WEB`](http://bulba.at.kz) 
-- Alfonso D. C. aka Dioniso >> `?`
-- MSXKun/Paxanga soft > [`WEB`](http://paxangasoft.retroinvaders.com/)
-- Sapphire/Z80ST > [`WEB`](http://z80st.auic.es/)
-- Makinavaja for his music. [`SoundCloud`](https://soundcloud.com/makimsx)
-- Aoineko > [`GitHub`](https://github.com/aoineko-fr)
-- Avelino Herrera > [`WEB`](http://msx.avelinoherrera.com)
-- Nerlaska > [`Blog`](http://albertodehoyonebot.blogspot.com.es)
-- Marq/Lieves!Tuore > [`Marq`](http://www.kameli.net/marq/) [`Lieves!Tuore`](http://www.kameli.net/lt/)
-- Fubukimaru [`gitHub`](https://github.com/Fubukimaru)
-- Andrear > [`Blog`](http://andrear.altervista.org/home/msxsoftware.php)
-- Fernando García > [`Video Tutoriales`](http://www.z80st.es/cursos/bitvision-assembler)
-- Ramones > [`MSXblog`](https://www.msxblog.es/tutoriales-de-programacion-en-ensamblador-ramones/) - [`MSXbanzai`](http://msxbanzai.tni.nl/dev/faq.html)
-- Eric Boez > [`gitHub`](https://github.com/ericb59)
-- MSX Assembly Page > [`WEB`](http://map.grauw.nl/resources/msxbios.php)
-- Portar MSX Tech Doc > [`WEB`](https://problemkaputt.de/portar.htm)
-- MSX Resource Center [`Development Wiki`](https://www.msx.org/wiki/#Developing_for_MSX)
-- Karoshi MSX Community > [`WEB`](http://karoshi.auic.es/)
-- BlueMSX emulator >> [`WEB`](http://www.bluemsx.com/)
-- OpenMSX emulator >> [`WEB`](http://openmsx.sourceforge.net/)
-- [`WebMSX`](https://webmsx.org/) emulator by Paulo A. Peccin >> [`gitHub`](https://github.com/ppeccin/webmsx)
-- fMSX emulator by Marat Fayzullin [`WEB`](https://fms.komkon.org/fMSX/)
-- Meisei emulator by Hap >> `?`
