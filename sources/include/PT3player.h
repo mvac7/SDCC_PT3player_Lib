@@ -1,28 +1,44 @@
 /* =============================================================================
-   SDCC Vortex Tracker II PT3 player for MSX
+PT3player 
+Vortex Tracker II PT3 player for MSX (Adapted for fR3eL Project)
+Version: 1.2 (11/2/2025)
+Architecture: MSX
+Format: C Object (SDCC .rel)
+Programming language: C and Z80 assembler
+Compiler: SDCC v4.4 or newer
 
-   Version: 1.1.10 (05/10/2021)
-   Architecture: MSX
-   Format: C Object (SDCC .rel)
-   Programming language: C and Z80 assembler
+Authors:
+- Vortex Tracker II v1.0 PT3 player for ZX Spectrum by S.V.Bulba 
+  <vorobey@mail.khstu.ru> http://bulba.at.kz
+- (09-Jan-05) Adapted to MSX by Alfonso D. C. aka Dioniso 
+  <dioniso072@yahoo.es>
+- Arrangements for MSX ROM: MSXKun/Paxanga soft > 
+  http://paxangasoft.retroinvaders.com/
+- asMSX version: SapphiRe > http://www.z80st.es/
+- Adapted to SDCC: mvac7/303bcn > <mvac7303b@gmail.com>
 
-   Authors:
-    - Vortex Tracker II v1.0 PT3 player for ZX Spectrum by S.V.Bulba 
-      <vorobey@mail.khstu.ru> http://bulba.at.kz
-    - (09-Jan-05) Adapted to MSX by Alfonso D. C. aka Dioniso 
-      <dioniso072@yahoo.es>
-    - Arrangements for MSX ROM: MSXKun/Paxanga soft > 
-      http://paxangasoft.retroinvaders.com/
-    - asMSX version: SapphiRe > http://www.z80st.es/
-    - Adapted to SDCC: mvac7/303bcn > <mvac7303b@gmail.com>
+Description:
+ Adaptation of the Vortex Tracker II PT3 Player for MSX to be used in 
+ software development in C (SDCC).
+ 
+ Requires the AY38910BF library  https://github.com/mvac7/SDCC_AY38910BF_Lib 
+ 
+History of versions: (dd/mm/yyyy)
+- v1.2    (11/02/2025) update to SDCC (4.1.12) Z80 calling conventions
+- v1.1.10 (05/10/2021) note table in Player_InitSong and Bug in Player_Resume
+- v1.1.9  (07/07/2021) Delete PlayAY() and AYREGS (need the AY38910BF) 
+- v1.1.8  (16/04/2021) add Player_IsEnd() function
+- v1.1.7  (24/03/2021)
+- v1.1.6  (15/02/2021) same function names in music libraries 
+- v1.1.5  (22/01/2021) Adjusted to work without the 100 Byte header
+- v1.1.4  (08/01/2021) PT3_Init and Bug #11 in loop
+- v1.1.3  (05/01/2021) PT3state, PT3_Loop, PT3_Pause and PT3_Resume
+- v1.1.2  (04/01/2021) assignment of frequency table memory address to NoteTable 
+- v1.1    (28/05/2019) Adaptation to SDCC of asMSX version by SapphiRe.
+- v1.0    (21/10/2016) Adaptation to SDCC of the ROM version by Kun.
 
-   Description:
-     Adaptation of the Vortex Tracker II PT3 Player for MSX to be used in 
-     software development in C (SDCC). 
-     
-     Requires the AY38910BF library  https://github.com/mvac7/SDCC_AY38910BF_Lib 
-
-In this replayer:
+-------------------------------------------------------------------------------
+Authors' notes:
 
 Dioniso version:
  - No version detection (just for Vortex Tracker II and PT3.5).
@@ -33,6 +49,8 @@ Dioniso version:
 
 msxKun version:
  - Usable desde ROM (solo tiene en RAM area de trabajo, lo minimo posible).
+   Usable from ROM (only has work area in RAM, the minimum possible).
+
 
 SapphiRe version:
  This version of the replayer uses a fixed volume and note table, if you need a 
@@ -43,8 +61,7 @@ SapphiRe version:
 
 
 mvac7 version:
- Adaptation to C (SDCC) of the SapphiRe version.
- 
+ Adaptation to C (SDCC) of SapphiRe's version.
 ============================================================================= */
 #ifndef  __PT3_PLAYER_H__
 #define  __PT3_PLAYER_H__
@@ -55,7 +72,7 @@ mvac7 version:
 
 #ifndef _SWITCHER
 #define _SWITCHER
-  typedef enum {OFF = 0, ON = 1} SWITCHER;
+  typedef enum {OFF = 0, ON = 1} switcher;
 #endif
 
 
@@ -131,76 +148,77 @@ extern unsigned int PT3_ESldAdd;  //Envelope data (idem)
 
 
 /* =============================================================================
- Player_Init
- Description: Initialize the Player
- Input:       -
- Output:      -
+Player_Init
+Description: Initialize the Player
+Input:       -
+Output:      -
 ============================================================================= */
-void Player_Init();
+void Player_Init(void);
 
 
 
 /* =============================================================================
- Player_Loop
- Description: Change loop state
- Input:       - (char or SWITCHER definition) 0=OFF ; 1=ON
- Output:      -
+Player_Loop
+Description: Change loop state
+Input:       - (char) 0=OFF ; 1=ON  (you can use <switcher> definition)
+Output:      -
 ============================================================================= */
 void Player_Loop(char loop); 
 
 
 
 /* =============================================================================
- Player_Pause
- Description: Pause song playback
- Input:       -
- Output:      -
+Player_Pause
+Description: Pause song playback
+Input:       -
+Output:      -
 ============================================================================= */
-void Player_Pause();
+void Player_Pause(void);
 
 
 
 /* =============================================================================
- Player_Resume
- Description: Resume song playback
- Input:       -
- Output:      -
-============================================================================= */  	
-void Player_Resume();
+Player_Resume
+Description: Resume song playback
+Input:       -
+Output:      -
+============================================================================= */
+void Player_Resume(void);
 
 
 
-/* -----------------------------------------------------------------------------
- Player_InitSong
- Description: Initialize song
- Input: (unsigned int) Song data address. 
-                       If the PT3 binary contains the header it will require 
-                       subtracting 100 from this value.
-        (unsigned int) Note Table address.
-        (char) Loop - 0=off ; 1=on  (false = 0, true = 1));
- Output:      -
------------------------------------------------------------------------------ */
+/* =============================================================================
+Player_IsEnd
+Description: Indicates whether the song has finished playing
+Input:       -
+Output:      [char] 0 = No, 1 = Yes 
+============================================================================= */
+char Player_IsEnd(void);
+
+
+
+/* =============================================================================
+Player_InitSong
+Description: Initialize song
+Input: 
+	(unsigned int) Song data address. 
+				   If the PT3 binary contains the header it will require 
+				   subtracting 100 from this value.
+	(unsigned int) Note Table address.
+	(char) Loop - 0=OFF ; 1=ON  (you can use <switcher> definition)
+Output:      -
+============================================================================= */
 void Player_InitSong(unsigned int songADDR, unsigned int notetableADDR, char loop);
 
 
 
-/* -----------------------------------------------------------------------------
- Player_Decode
- Description: Process the next step in the song sequence
- Input:       -
- Output:      - 
------------------------------------------------------------------------------ */
-void Player_Decode(); 
-
-
-
-/* -----------------------------------------------------------------------------
- Player_IsEnd
- Description: Indicates whether the song has finished playing
- Input:       -
- Output:      [char] 0 = No, 1 = Yes 
------------------------------------------------------------------------------ */
-char Player_IsEnd();
+/* =============================================================================
+Player_Decode
+Description: Process the next step in the song sequence
+Input:       -
+Output:      - 
+============================================================================= */
+void Player_Decode(void); 
 
 
 

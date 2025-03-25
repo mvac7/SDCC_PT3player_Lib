@@ -1,27 +1,30 @@
 /* ----------------------------------------------------------------------------- 
-MSX System Variables v0.82 26/4/2019
+ MSX System Variables v0.84 24/10/2024
+  __  __ _____  __           __   __           
+ |  \/  / __\ \/ / ____  _ __\ \ / /_ _ _ _ ___
+ | |\/| \__ \>  < (_-< || (_-<\ V / _` | '_(_-<
+ |_|  |_|___/_/\_\/__/\_, /__/ \_/\__,_|_| /__/
+                      |__/ 
 
-definitions & texts by:
-
-- MSX Assembly Page
-  http://map.grauw.nl/resources/msxsystemvars.php
-  
-- MSX Resource Center (MRC)
-  https://www.msx.org/wiki/System_variables_and_work_area
+ Definitions and descriptions by:
+ * MSX Assembly Page
+   http://map.grauw.nl/resources/msxsystemvars.php
+ * MSX Resource Center (MRC)
+   https://www.msx.org/wiki/System_variables_and_work_area
 ----------------------------------------------------------------------------- */
 
 #ifndef  __MSXSYSTEMVARS_H__
 #define  __MSXSYSTEMVARS_H__
 
-// Z80 Wait for interrupt or reset
-//#define  HALT __asm halt __endasm
 
 // MSX System Variables
-#define CGTABL 0x0004 // Base address of the MSX character set in ROM
-#define VDPDR  0x0006 // Base port address for VDP data read
-#define VDPDW  0x0007 // Base port address for VDP data write
+#define CGTABL	0x0004	// Base address of the MSX character set in ROM
+#define VDPDR	0x0006	// Base port address for VDP data read
+#define VDPDW	0x0007	// Base port address for VDP data write
 
-//0x002B	//1	Basic ROM version
+
+#define MSXID1	0x002B	// Basic ROM version 1/3
+						// (1B) Basic ROM version
 /*
 7 6 5 4 3 2 1 0
 | | | | +-+-+-+-- Character set
@@ -31,8 +34,10 @@ definitions & texts by:
 +---------------- Default interrupt frequency
                   0 = 60Hz, 1 = 50Hz
 */
-                  
-#define MSXROM  0x002C	//1	Basic ROM version
+
+
+#define MSXID2	0x002C	// Basic ROM version 2/3
+#define MSXROM  0x002C	// (1B) Basic ROM version
 /*
 7 6 5 4 3 2 1 0
 | | | | +-+-+-+-- Keyboard type
@@ -42,13 +47,18 @@ definitions & texts by:
                   0 = Japanese, 1 = International
 */
 
-#define MSXVER  0x002D	//1	MSX version number
+
+#define MSXID3	0x002D	// Basic ROM version 3/3
+#define MSXVER  0x002D	// (1B) MSX version number
 /*
 0 = MSX 1
 1 = MSX 2
 2 = MSX 2+
 3 = MSX turbo R
 */
+
+
+
 
 //0x002E	//1	Bit 0: if 1 then MSX-MIDI is present internally (MSX turbo R only)
 
@@ -105,6 +115,7 @@ definitions & texts by:
 #define CSRX	0xF3DD	//1	Current column-position of the cursor
 #define CNSDFG	0xF3DE	//1	=0 when function keys are not displayed
                         //  =1 when function keys are displayed
+						
 #define RG0SAV	0xF3DF	//1	Content of VDP(0) register (R#0)
 #define RG1SAV	0xF3E0	//1	Content of VDP(1) register (R#1)
 #define RG2SAV	0xF3E1	//1	Content of VDP(2) register (R#2)
@@ -142,30 +153,30 @@ definitions & texts by:
 #define PUTPNT	0xF3F8	//2	Address in the keyboard buffer where a character will be written
 #define GETPNT	0xF3FA	//2	Address in the keyboard buffer where the next character is read
 
-#define CS120	  0xF3FC	//5	Cassette I/O parameters to use for 1200 baud
-#define CS240	  0xF401	//5	Cassette I/O parameters to use for 2400 baud
+#define CS120	0xF3FC	//5	Cassette I/O parameters to use for 1200 baud
+#define CS240	0xF401	//5	Cassette I/O parameters to use for 2400 baud
 #define LOW	    0xF406	//2	Signal delay when writing a 0 to tape
-#define HIGH	  0xF408	//2	Signal delay when writing a 1 to tape
+#define HIGH	0xF408	//2	Signal delay when writing a 1 to tape
 #define HEADER	0xF40A	//1	Delay of tape header (sync.) block
 
 #define ASPCT1	0xF40B	//2	Horizontal / Vertical aspect for CIRCLE command
 #define ASPCT2	0xF40D	//2	Horizontal / Vertical aspect for CIRCLE command
 #define ENDPRG	0xF40F	//5	Pointer for the RESUME NEXT command
 #define ERRFLG	0xF414	//1	Basic Error code
-#define LPTPOS	 0xF415	//1	Position of the printer head
+#define LPTPOS	0xF415	//1	Position of the printer head
 //Is read by Basic function LPOS and used by LPRINT Basic command
-#define PRTFLG	 0xF416	//1	Printer output flag is read by OUTDO
+#define PRTFLG	0xF416	//1	Printer output flag is read by OUTDO
 //=0 to print to screen
 //=1 to print to printer
-#define NTMSXP	 0xF417	//1	Printer type is read by OUTDO. SCREEN ,,,n writes to this address
+#define NTMSXP	0xF417	//1	Printer type is read by OUTDO. SCREEN ,,,n writes to this address
 //=0 for MSX printer
 //=1 for non-MSX printer
-#define RAWPRT	 0xF418	//1	Raw printer output is read by OUTDO
+#define RAWPRT	0xF418	//1	Raw printer output is read by OUTDO
 //=0 to convert tabs and unknown characters to spaces and remove graphical headers
 //=1 to send data just like it gets it
-#define VLZADR	 0xF419	//2	Address of data that is temporarilly replaced by ‘O’ when Basic function VAL("") is running
-#define VLZDAT	 0xF41B	//1	Original value that was in the address pointed to with VLZADR
-#define CURLIN	 0xF41C	//2	Line number the Basic interpreter is working on, in direct mode it will be filled with #FFFF
+#define VLZADR	0xF419	//2	Address of data that is temporarilly replaced by ‘O’ when Basic function VAL("") is running
+#define VLZDAT	0xF41B	//1	Original value that was in the address pointed to with VLZADR
+#define CURLIN	0xF41C	//2	Line number the Basic interpreter is working on, in direct mode it will be filled with #FFFF
 
 //Display
 #define NKSTR    0xF87F //(160B) Texts for function keys.
@@ -180,29 +191,75 @@ definitions & texts by:
 #define MAXDEL   0xF92F //(2B) End of the work area used by instruction LINE of Basic.
 
 
-
 //#F91F	1	Character set SlotID
 //#F920	2	Character set address
-#define EXBRSA	  0xFAF8    //(1B)  Slot address of the SUBROM (EXtended Bios-Rom Slot Address)
+#define EXBRSA	0xFAF8		//(1B)	Slot address of the SUBROM (EXtended Bios-Rom Slot Address)
 
-#define DRVINF	  0xFB21    //(1B)	Nr. of drives connected to disk interface 1
-                //0xFB22	  (1B)	Slot address of disk interface 1
-                //0xFB23	  (1B)	Nr. of drives connected to disk interface 2
-                //0xFB24	  (1B)	Slot address of disk interface 2
-                //0xFB25	  (1B)	Nr. of drives connected to disk interface 3
-                //0xFB26	  (1B)	Slot address of disk interface 3
-                //0xFB27	  (1B)	Nr. of drives connected to disk interface 4
-                //0xFB28	  (1B)	Slot address of disk interface 4
 
-#define EXPTBL	  0xFCC1    //(1B)	Slot 0: #80 = expanded, 0 = not expanded. Also slot address of the main BIOS-ROM.
-                //0xFCC2      (1B)	Slot 1: #80 = expanded, 0 = not expanded.
-                //0xFCC3      (1B)	Slot 2: #80 = expanded, 0 = not expanded.
-                //0xFCC4      (1B)	Slot 3: #80 = expanded, 0 = not expanded.
+#define MODE	0xFAFC		//(1B)	Flag for screen mode
+//	bit 7: 1 = conversion to Katakana; 0 = conversion to Hiragana. (MSX2+~)
+//	bit 6: 1 if Kanji ROM level 2. (MSX2+~)
+//	bit 5: 0 = SCREEN10, 1=SCREEN11. Selects when drawing functions will 
+//	          draw using RGB (SCREEN10) or YJK (SCREEN11) (MSX2+~)
+//	bit 4: 1 to disable the limit of the Y coordinate to 191 on SCREEN 2 & 4 
+//	          and to 211 on SCREEN 5/higher. (MSX2+~). 
+//	          Note: GRPPRT has a bug when printing text beyond line 211. 
+//	          It will set bogus blitter coordinates.
+//	bit 3: 1 to limit VRAM access to 16KB on SCREEN 0~3
+//	bits 1-2: VRAM size
+//		   00 for 16kB
+//		   01 for 64kB
+//		   10 for 128kB
+//		   11 for 192kB
+//	bit 0: 1 if the conversion of Romaji to Kana is possible. (MSX2~)
 
-#define SLTTBL	  0xFCC5	//(1B)	Mirror of slot 0 secondary slot selection register.
-                //0xFCC6      (1B)	Mirror of slot 1 secondary slot selection register.
-                //0xFCC7      (1B)	Mirror of slot 2 secondary slot selection register.
-                //0xFCC8      (1B)	Mirror of slot 3 secondary slot selection register.
+
+#define DRVINF	0xFB21		//(1B)	Nr. of drives connected to disk interface 1
+			//  0xFB22		  (1B)	Slot address of disk interface 1
+			//  0xFB23		  (1B)	Nr. of drives connected to disk interface 2
+			//  0xFB24		  (1B)	Slot address of disk interface 2
+			//  0xFB25		  (1B)	Nr. of drives connected to disk interface 3
+			//  0xFB26		  (1B)	Slot address of disk interface 3
+			//  0xFB27		  (1B)	Nr. of drives connected to disk interface 4
+			//  0xFB28		  (1B)	Slot address of disk interface 4
+
+
+#define LINWRK	0xFC18		//(40B)	Work area for screen management
+#define PATWRK	0xFC40		//(8B)	Returned character pattern by the routine GETPAT
+#define GRPHED	0xFCA6		//(1B)	Heading for the output of graphic characters
+#define SCRMOD	0xFCAF		//(1B)	Screen mode
+#define OLDSCR	0xFCB0		//(1B)	Old screen mode
+
+#define NORUSE	0xFAFD		//(1B)	Used by KANJI-ROM for rendering KANJI fonts in graphic modes. (MSX2~)
+							//	bit 7 Don't return to textmode
+							//	bit 6 if 1 and F7F4h (DECCNT)=0, read SHIFT status ???
+							//	bit 5 Disable some functinality
+							//	bit 4 Not in use	
+							//	bit 3 color 0 = Transparent
+							//	bit 0-2: Logical operation on kanji font draw
+							//		  0 for PSET
+							//		  1 for AND
+							//		  2 for OR
+							//		  3 for XOR
+							//		  4 for NOT
+
+#define LOGOPR	0xFB02		//(1B)	Logical operation code. (MSX2~)
+#define GXPOS	0xFCB3		//(2B)	X-position of graphic cursor
+#define GYPOS	0xFCB5		//(2B)	Y-position of graphic cursor
+#define GRPACX	0xFCB7		//(2B)	X Graphics Accumulator
+#define GRPACY	0xFCB9		//(2B)	Y Graphics Accumulator
+
+#define HIMEM	0xFC4A		//Stack at the top of memory
+
+#define EXPTBL	0xFCC1		//(1B)	Slot 0: #80 = expanded, 0 = not expanded. Also slot address of the main BIOS-ROM.
+			//  0xFCC2        (1B)	Slot 1: #80 = expanded, 0 = not expanded.
+			//  0xFCC3        (1B)	Slot 2: #80 = expanded, 0 = not expanded.
+			//  0xFCC4        (1B)	Slot 3: #80 = expanded, 0 = not expanded.
+
+#define SLTTBL	0xFCC5		//(1B)	Mirror of slot 0 secondary slot selection register.
+			//  0xFCC6        (1B)	Mirror of slot 1 secondary slot selection register.
+			//  0xFCC7        (1B)	Mirror of slot 2 secondary slot selection register.
+			//  0xFCC8        (1B)	Mirror of slot 3 secondary slot selection register.
 
 #define RG08SAV   0xFFE7    //Content of VDP(09) register (R#08)
 #define RG09SAV   0xFFE8    //Content of VDP(10) register (R#09)
@@ -228,7 +285,7 @@ definitions & texts by:
 //#define 0xFFFD              Temporary stack pointer storage
 
 
-#define SLTSL     0xFFFF //(all slots)	1	Secondary slot select register. Reading returns the inverted previously written value.
+#define SLTSL     0xFFFF	//(all slots)	1	Secondary slot select register. Reading returns the inverted previously written value.
 
 
 #endif

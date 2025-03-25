@@ -1,7 +1,14 @@
-// MSX BIOS v1.2 (06/12/2023)
-// definitions & descriptions by MSX Assembly Page
-// only includes descriptions. For details see the WEB document in:
-// http://map.grauw.nl/resources/msxbios.php
+/* -----------------------------------------------------------------------------
+ MSX BIOS definitions v1.2 (06/12/2023)
+  ___ ___ ___  ___     _      __    
+ | _ )_ _/ _ \/ __| __| |___ / _|___
+ | _ \| | (_) \__ \/ _` / -_)  _(_-<
+ |___/___\___/|___/\__,_\___|_| /__/
+
+ Definitions & descriptions by MSX Assembly Page
+ Only includes descriptions. For details see the WEB document in:
+ http://map.grauw.nl/resources/msxbios.php
+----------------------------------------------------------------------------- */
 
 #ifndef  __MSXBIOS_H__
 #define  __MSXBIOS_H__
@@ -10,18 +17,18 @@
 //More info (MSX Assembly Page): http://map.grauw.nl/resources/msxbios.php  
 
 // RST-and other routines
-#define BIOS_CHKRAM  0x0000 // Check RAM and sets slot for command area.
-#define BIOS_SYNCHR  0x0008 // Checks if then current character pointed by HL is one desired.
+#define BIOS_CHKRAM  0x0000 // (RST  0 ) Check RAM and sets slot for command area.
+#define BIOS_SYNCHR  0x0008 // (RST  8h) Checks if then current character pointed by HL is one desired.
 #define BIOS_RDSLT   0x000C // Reads the value of an address in another slot
-#define BIOS_CHRGTR  0x0010 // Gets the next character (or token) of the Basic-text
+#define BIOS_CHRGTR  0x0010 // (RST 10h) Gets the next character (or token) of the Basic-text
 #define BIOS_WRSLT   0x0014 // Writes a value to an address in another slot.
-#define BIOS_OUTDO   0x0018 // Output to current outputchannel (printer, diskfile, etc.)
+#define BIOS_OUTDO   0x0018 // (RST 18h) Output to current outputchannel (printer, diskfile, etc.)
 #define BIOS_CALSLT  0x001C // Executes inter-slot call.
-#define BIOS_DCOMPR  0x0020 // Compares HL with DE
+#define BIOS_DCOMPR  0x0020 // (RST 20h) Compares HL with DE
 #define BIOS_ENASLT  0x0024 // Switches indicated slot at indicated page on perpetual
-#define BIOS_GETYPR  0x0028 // Returns Type of DAC
-#define BIOS_CALLF   0x0030 // Executes an interslot call
-#define BIOS_KEYINT  0x0038 // Executes the timer interrupt process routine
+#define BIOS_GETYPR  0x0028 // (RST 28h) Returns Type of DAC
+#define BIOS_CALLF   0x0030 // (RST 30h) Executes an interslot call
+#define BIOS_KEYINT  0x0038 // (RST 38h) Executes the timer interrupt process routine
 
 // Initialization-routines
 #define BIOS_INITIO  0x003B // Initialises the device

@@ -1,0 +1,29 @@
+XL3
+H 9 areas 4 global symbols
+M keyboard_MSXROM
+O -mz80
+S .__.ABS. Def000000
+A _CODE size 9 flags 0 addr 0
+S _KillBuffer Def000000
+S _GetKeyMatrix Def000006
+S _INKEY Def000003
+A _DATA size 0 flags 0 addr 0
+A _INITIALIZED size 0 flags 0 addr 0
+A _DABS size 0 flags 8 addr 0
+A _HOME size 0 flags 0 addr 0
+A _GSINIT size 0 flags 0 addr 0
+A _GSFINAL size 0 flags 0 addr 0
+A _INITIALIZER size 0 flags 0 addr 0
+A _CABS size 0 flags 8 addr 0
+T 00 00 00
+R 00 00 00 00
+T 00 00 00 C3 56 01
+R 00 00 00 00
+T 03 00 00
+R 00 00 00 00
+T 03 00 00 C3 9F 00
+R 00 00 00 00
+T 06 00 00
+R 00 00 00 00
+T 06 00 00 C3 41 01
+R 00 00 00 00
