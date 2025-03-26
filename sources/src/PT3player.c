@@ -383,7 +383,7 @@ __asm
 	push  HL
 	ld   (#_NoteTable),DE
 
-	call ClearDefAYbuffer	;Clear AY buffer (AY38910BF library) 
+	call _ClearDefAYbuffer	;Clear AY buffer (AY38910BF library) 
 
 	xor  A
 	ld   HL,#_PT3_state

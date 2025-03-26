@@ -69,7 +69,10 @@ void my_TIMI(void);
 
 //void SilenceAY(char AYport);
 
-//void Copy2secondAY(void);
+
+void Copy2firstAY(void);
+void Copy2secondAY(void);
+
 
 void DumpOAM(void);
 
@@ -143,7 +146,8 @@ char GUI_End;
 
 //char _currentSong;
 
-char AYREGS_plus[14];	// buffer for second AY
+char AYREGS_AY1[14];	// buffer for first  AY
+char AYREGS_AY2[14];	// buffer for second AY
      
 
 // Functions -------------------------------------------------------------------
@@ -243,9 +247,15 @@ void main(void)
 			}   
 		}*/
 
-		ShowVumeter(0,AYREGS[AY_AmpA]);
-		ShowVumeter(1,AYREGS[AY_AmpB]);
-		ShowVumeter(2,AYREGS[AY_AmpC]); 
+		//AY1
+		ShowVumeter(0,AYREGS_AY1[AY_AmpA]);
+		ShowVumeter(1,AYREGS_AY1[AY_AmpB]);
+		ShowVumeter(2,AYREGS_AY1[AY_AmpC]); 
+		
+		//AY2
+		ShowVumeter(3,AYREGS_AY2[AY_AmpA]);
+		ShowVumeter(4,AYREGS_AY2[AY_AmpB]);
+		ShowVumeter(5,AYREGS_AY2[AY_AmpC]);
 
 		//VLOCATE(2,22);
 		//VPrintFNumber(AYREGS[AY_AmpB],0x20,3);		
@@ -300,13 +310,13 @@ void main(void)
 			}      
 		}else Row8pressed=false;
 
-
+		if (_PSGtype&2) Copy2secondAY();	//It is placed before the Decode to create a small sound Delay (1 frame)
 		Player_Decode();  //Process the next step in the song sequence
+		if (_PSGtype&1) Copy2firstAY();
 
 		ShowPlayback();
 		ShowLoop();
 		ShowENDsong();
-
 	}
 
 /*  
@@ -325,8 +335,11 @@ void my_TIMI(void)
 {
 	PUSH_AF;
 
-	if (_PSGtype==3) Dump2AY(AY_EXTERNAL,(unsigned int) AYREGS);
-	PlayAY();
+	if (_PSGtype&1) Dump2AY(AY_INTERNAL,(unsigned int) AYREGS_AY1);
+	if (_PSGtype&2) Dump2AY(AY_EXTERNAL,(unsigned int) AYREGS_AY2);
+	AYREGS_AY1[13]=0b10000000;	//disable enveloppe
+	AYREGS_AY2[13]=0b10000000;	//disable enveloppe
+	//PlayAY();
 
 	DumpOAM();	//Vumeter - dump to VRAM sprite attributes
 
@@ -352,11 +365,11 @@ void SelectAY(char type)
 	if(type==0 || type>3) type=1;
 	_PSGtype = type;
 	
-	if(type&1)	AY_IOport = AY_INTERNAL;
-	if(type==2) AY_IOport = AY_EXTERNAL;
+	//if(type&1)	AY_IOport = AY_INTERNAL;
+	//if(type==2) AY_IOport = AY_EXTERNAL;
 	
-	if(type==1)	SilenceAYbyPort(AY_EXTERNAL);
-	if(type==2)	SilenceAYbyPort(AY_INTERNAL);
+	if(type==1){ClearAYbuffer((unsigned int) AYREGS_AY2);SilenceAYbyPort(AY_EXTERNAL);}
+	if(type==2){ClearAYbuffer((unsigned int) AYREGS_AY1);SilenceAYbyPort(AY_INTERNAL);}
 	
 	VLOCATE(4,23);
 	//VPrintFNumber(type,0x20,3);
@@ -413,15 +426,27 @@ __endasm;
 }*/
 
 
-/*void Copy2secondAY(void)
+
+void Copy2firstAY(void)
 {
 __asm
     LD   HL,#_AYREGS
-    LD   DE,#_AYREGS_plus
+    LD   DE,#_AYREGS_AY1
     LD   BC,#14
     LDIR
 __endasm;
-}*/
+}
+
+
+void Copy2secondAY(void)
+{
+__asm
+    LD   HL,#_AYREGS
+    LD   DE,#_AYREGS_AY2
+    LD   BC,#14
+    LDIR
+__endasm;
+}
 
 
 

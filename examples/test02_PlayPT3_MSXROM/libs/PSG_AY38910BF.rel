@@ -6,11 +6,11 @@ S .__.ABS. Def000000
 A _CODE size 81 flags 0 addr 0
 S _Dump2AY Def00004D
 S _GetSound Def00001F
-S ClearDefAYbuffer Def000005
 S _InitAY Def000000
 S _PlayAY Def00003E
+S _ClearAYbuffer Def000008
 S _SOUND Def000015
-S AY_ClearBuffer Def000008
+S _ClearDefAYbuffer Def000005
 S _SilenceAYbyPort Def00002E
 S _SilenceAY Def000028
 A _DATA size E flags 0 addr 0

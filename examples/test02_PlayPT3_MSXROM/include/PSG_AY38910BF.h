@@ -1,6 +1,6 @@
 /* =============================================================================
 PSG_AY38910BF
-PSG AY-3-8910 Buffer MSX SDCC Library version (fR3eL Project)
+PSG AY-3-8910 Buffer MSX SDCC Library (fR3eL Project)
 ============================================================================= */
 
 #ifndef  __AY38910BF_H__
@@ -10,29 +10,37 @@ PSG AY-3-8910 Buffer MSX SDCC Library version (fR3eL Project)
 
 #ifndef AY_REGISTERS
 #define AY_REGISTERS
-#define AY_ToneA      0 //Channel A Tone Period (12 bits)
-#define AY_ToneB      2 //Channel B Tone Period (12 bits)
-#define AY_ToneC      4 //Channel C Tone Period (12 bits)
-#define AY_Noise      6 //Noise Period (5 bits)
-#define AY_Mixer      7 //Mixer
-#define AY_AmpA       8 //Channel Volume A (4 bits + B5 active Envelope)
-#define AY_AmpB       9 //Channel Volume B (4 bits + B5 active Envelope)
-#define AY_AmpC      10 //Channel Volume C (4 bits + B5 active Envelope)
-#define AY_EnvPeriod 11 //Envelope Period (16 bits)
-#define AY_EnvShape  13 //Envelope Shape
+#define AY_ToneA			0 //Channel A Tone Period (12 bits)
+#define AY_ToneA_fine		0 //Channel A Fine Tune   (8 bits)
+#define AY_ToneA_coarse		1 //Channel A Coarse Tune (4 bits)
+#define AY_ToneB			2 //Channel B Tone Period (12 bits)
+#define AY_ToneB_fine		2 //Channel B Fine Tune   (8 bits)
+#define AY_ToneB_coarse		3 //Channel B Coarse Tune (4 bits)
+#define AY_ToneC			4 //Channel C Tone Period (12 bits)
+#define AY_ToneC_fine		4 //Channel C Fine Tune   (8 bits)
+#define AY_ToneC_coarse		5 //Channel C Coarse Tune (4 bits)
+#define AY_Noise			6 //Noise Period (5 bits)
+#define AY_Mixer			7 //Mixer
+#define AY_AmpA				8 //Channel Volume A (4 bits + B5 active Envelope)
+#define AY_AmpB				9 //Channel Volume B (4 bits + B5 active Envelope)
+#define AY_AmpC				10 //Channel Volume C (4 bits + B5 active Envelope)
+#define AY_EnvPeriod		11 //Envelope Period (16 bits)
+#define AY_EnvPeriod_fine	11 //Envelope Fine Tune   (8 bits)
+#define AY_EnvPeriod_coarse	12 //Envelope Coarse Tune (8 bits)
+#define AY_EnvShape			13 //Envelope Shape
 #endif
 
 
 
 //AY envelope shapes
-#define AY_ENV_LowerBeat      1  //(0,1,2,3 and 9)<-- 0 can be useful in case you need to control when the envelope is triggered
-#define AY_ENV_Upper          4  //(4,5,6,7 and 15)
-#define AY_ENV_LeftSaw        8
-#define AY_ENV_LowerTriangle 10 
-#define AY_ENV_LowerHold     11 
-#define AY_ENV_RightSaw      12
-#define AY_ENV_UpperHold     13
-#define AY_ENV_UpperTriangle 14 
+#define AY_ENV_LowerBeat      1	// (0,1,2,3 and 9)<-- 0 can be useful in case you need to control when the envelope is triggered
+#define AY_ENV_Upper          4	// (4,5,6,7 and 15)
+#define AY_ENV_LeftSaw        8	//
+#define AY_ENV_LowerTriangle 10	//
+#define AY_ENV_LowerHold     11	//
+#define AY_ENV_RightSaw      12	//
+#define AY_ENV_UpperHold     13	//
+#define AY_ENV_UpperTriangle 14	//
 
 
 
@@ -60,33 +68,54 @@ extern char AYREGS[14];		// buffer of AY registers
 /* =============================================================================
 InitAY
 
-Function : Initialize the buffer
-Input    : -
-Output   : -
+Function:	Initialize the library. Set default AY (internal) and clear buffer.
+Input   :	-
+Output  :	-
 ============================================================================= */
 void InitAY(void);
 
 
 
 /* =============================================================================
-SOUND(register, value)
+ClearDefAYbuffer
 
-Function : Write into a register of PSG
-Input    : 
-			[char] register number (0 to 13)
+Function:	Clear default AY buffer (AYREGS).
+Input   :	-
+Output  :	-
+============================================================================= */
+extern void ClearDefAYbuffer(void);
+
+
+
+/* =============================================================================
+ClearAYbuffer
+
+Function:	Clear indicated AY buffer.
+Input   :	-
+Output  :	-
+============================================================================= */
+extern void ClearAYbuffer(unsigned int bufferADDR);
+
+
+
+/* =============================================================================
+SOUND
+
+Function:	Writes a value to the PSG register buffer
+Input   :	[char] register number (0 to 13)
 			[char] value
-Output   : -
+Output  :	-
 ============================================================================= */
 void SOUND(char reg, char value);
 
 
 
 /* =============================================================================
-GetSound(register)
+GetSound
 
-Function : Read PSG register value (from buffer)
-Input    : [char] register number (0 to 13)
-Output   : [char] value 
+Function:	Read PSG register value (from buffer)
+Input   :	[char] register number (0 to 13)
+Output  :	[char] value 
 ============================================================================= */
 char GetSound(char reg);
 
@@ -106,38 +135,36 @@ void SilenceAY(void);
 /* =============================================================================
 SilenceAYbyPort
 
-Function : 
-			Silences the indicated AY sound processor.
+Function:	Silences the indicated AY sound processor.
 			Set to zero the amplitude value by writing directly to the AY registers.
 			This is indicated for the case of playing sound dynamically between 
 			AYs (Internal/External), so that the last written values ​​do not sound 
 			infinitely.
-Input    : [char] AY index port
-Output   : -
+Input   :	[char] AY index port
+Output  :	-
 ============================================================================= */
 void SilenceAYbyPort(char AY_port);
 
 
 
 /* =============================================================================
-PlayAY() 
+PlayAY
 
-Function : Copy buffer to selected AY (AY_IOport)
-Input    : -
-Output   : -
+Function:	Copy buffer to selected AY (AY_IOport)
+Input   :	-
+Output  :	-
 ============================================================================= */
 void PlayAY(void);
 
 
 
 /* =============================================================================
-Dump2AY() 
+Dump2AY
 
-Function : Dump a buffer to the indicated AY
-Input    : 
-			[char] AY index port
+Function:	Dump a buffer to the indicated AY
+Input   :	[char] AY index port
 			[unsigned int] buffer address of AY registers
-Output   : -
+Output  :	-
 ============================================================================= */
 void Dump2AY(char AY_port, unsigned int bufferADDR);
 
